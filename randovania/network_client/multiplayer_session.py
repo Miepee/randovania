@@ -1,0 +1,141 @@
+from __future__ import annotations
+
+import dataclasses
+import datetime
+import uuid
+
+from randovania.bitpacking.json_dataclass import JsonDataclass
+from randovania.game_description.resources.item_resource_info import InventoryItem
+from randovania.game_description.resources.pickup_entry import PickupEntry
+from randovania.game_description.resources.pickup_index import PickupIndex
+from randovania.games.game import RandovaniaGame
+from randovania.layout.versioned_preset import VersionedPreset
+from randovania.network_common.session_state import MultiplayerSessionState
+
+
+@dataclasses.dataclass(frozen=True)
+class MultiplayerSessionListEntry(JsonDataclass):
+    id: int
+    name: str
+    has_password: bool
+    state: MultiplayerSessionState
+    num_players: int
+    creator: str
+    creation_date: datetime.datetime
+
+    def __post_init__(self):
+        tzinfo = self.creation_date.tzinfo
+        assert tzinfo is not None and tzinfo.utcoffset(self.creation_date) is not None
+
+
+@dataclasses.dataclass(frozen=True)
+class MultiplayerUser(JsonDataclass):
+    id: int
+    name: str
+    admin: bool
+    worlds: dict[uuid.UUID, str]
+
+
+@dataclasses.dataclass()
+class MultiplayerWorld(JsonDataclass):
+    id: uuid.UUID
+    name: str
+    preset: VersionedPreset
+
+
+@dataclasses.dataclass(frozen=True)
+class MultiplayerPickups:
+    world_id: uuid.UUID
+    game: RandovaniaGame
+    pickups: tuple[tuple[str, PickupEntry], ...]
+
+
+@dataclasses.dataclass(frozen=True)
+class MultiplayerWorldAction(JsonDataclass):
+    provider: uuid.UUID
+    receiver: uuid.UUID
+    pickup: str
+    location: int
+    time: datetime.datetime
+
+    @property
+    def location_index(self):
+        return PickupIndex(self.location)
+
+
+@dataclasses.dataclass(frozen=True)
+class MultiplayerWorldActions:
+    session_id: int
+    actions: tuple[MultiplayerWorldAction, ...]
+
+
+@dataclasses.dataclass(frozen=True)
+class GameDetails(JsonDataclass):
+    seed_hash: str
+    word_hash: str
+    spoiler: bool
+
+
+@dataclasses.dataclass(frozen=True)
+class MultiplayerSessionEntry(JsonDataclass):
+    id: int
+    name: str
+    worlds: list[MultiplayerWorld]
+    users: list[MultiplayerUser]
+    game_details: GameDetails | None
+    state: MultiplayerSessionState
+    generation_in_progress: int | None
+    allowed_games: list[RandovaniaGame]
+
+    @property
+    def num_admins(self) -> int:
+        return sum(1 for player in self.users if player.admin)
+
+    def get_world(self, world_id: uuid.UUID) -> MultiplayerWorld:
+        for world in self.worlds:
+            if world.id == world_id:
+                return world
+        raise KeyError(f"No world with id {world_id}")
+
+
+@dataclasses.dataclass(frozen=True)
+class MultiplayerSessionAuditEntry(JsonDataclass):
+    user: str
+    message: str
+    time: datetime.datetime
+
+
+@dataclasses.dataclass(frozen=True)
+class MultiplayerSessionAuditLog:
+    session_id: int
+    entries: tuple[MultiplayerSessionAuditEntry, ...]
+
+
+@dataclasses.dataclass(frozen=True)
+class WorldUserInventory:
+    world_id: uuid.UUID
+    user_id: int
+    inventory: dict[str, InventoryItem]
+
+
+@dataclasses.dataclass(frozen=True)
+class User:
+    id: int
+    name: str
+    discord_id: int | None = None
+
+    @classmethod
+    def from_json(cls, data) -> "User":
+        return cls(
+            id=data["id"],
+            name=data["name"],
+            discord_id=data.get("discord_id"),
+        )
+
+    @property
+    def as_json(self) -> dict:
+        return {
+            "id": self.id,
+            "name": self.name,
+            "discord_id": self.discord_id,
+        }

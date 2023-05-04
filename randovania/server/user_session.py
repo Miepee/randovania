@@ -11,7 +11,7 @@ from oauthlib.oauth2.rfc6749.errors import InvalidTokenError
 from requests_oauthlib import OAuth2Session
 
 from randovania.network_common.error import InvalidSession, NotAuthorizedForAction, InvalidAction, UserNotAuthorized
-from randovania.server.database import User, UserAccessToken, GameSessionMembership
+from randovania.server.database import User, UserAccessToken, MultiplayerMembership
 from randovania.server.lib import logger
 from randovania.server.server_app import ServerApp
 
@@ -28,7 +28,7 @@ def _create_client_side_session_raw(sio: ServerApp, user: User) -> dict:
         "user": user.as_json,
         "sessions": [
             membership.session.create_list_entry()
-            for membership in GameSessionMembership.select().where(GameSessionMembership.user == user)
+            for membership in MultiplayerMembership.select().where(MultiplayerMembership.user == user)
         ],
     }
 
@@ -159,7 +159,7 @@ def restore_user_session(sio: ServerApp, encrypted_session: bytes, session_id: i
                 result = _create_client_side_session(sio, user)
 
         if session_id is not None:
-            sio.join_game_session(GameSessionMembership.get_by_ids(user.id, session_id))
+            sio.join_game_session(MultiplayerMembership.get_by_ids(user.id, session_id))
 
         return result
 

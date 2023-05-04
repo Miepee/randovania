@@ -37,7 +37,7 @@ async def test_browse_for_game_session(skip_qtbot, default_online_interactions, 
     mock_game_session_browser.return_value.refresh = AsyncMock(return_value=refresh_success)
 
     # Run
-    await default_online_interactions._browse_for_game_session()
+    await default_online_interactions._browse_for_session()
 
     # Assert
     mock_game_session_browser.assert_called_once_with(default_online_interactions.network_client)

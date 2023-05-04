@@ -20,7 +20,7 @@ class SessionAdminGlobalAction(Enum):
 
 
 class SessionAdminUserAction(Enum):
-    """Actions that operate on top of an user"""
+    """Actions that operate on top of a user"""
     KICK = "kick"
     MOVE = "move"
     SWITCH_IS_OBSERVER = "switch_is_observer"

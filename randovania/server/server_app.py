@@ -17,7 +17,7 @@ from randovania.network_common.error import (
 )
 from randovania.server import client_check
 from randovania.server.custom_discord_oauth import CustomDiscordOAuth2Session
-from randovania.server.database import User, GameSessionMembership
+from randovania.server.database import User, MultiplayerMembership
 from randovania.server.lib import logger
 
 
@@ -97,7 +97,7 @@ class ServerApp:
         except peewee.DoesNotExist:
             raise InvalidSession()
 
-    def join_game_session(self, membership: GameSessionMembership):
+    def join_game_session(self, membership: MultiplayerMembership):
         flask_socketio.join_room(f"game-session-{membership.session.id}")
         flask_socketio.join_room(f"game-session-{membership.session.id}-{membership.user.id}")
         with self.session() as sio_session:

@@ -11,7 +11,7 @@ from randovania.game_connection.connector.remote_connector import RemoteConnecto
 from randovania.game_connection.game_connection import GameConnection, ConnectedGameState
 from randovania.gui.lib.qt_network_client import QtNetworkClient
 from randovania.lib import json_lib
-from randovania.network_client.game_session import GameSessionPickups
+from randovania.network_client.multiplayer_session import MultiplayerPickups
 from randovania.network_client.network_client import UnableToConnect
 from randovania.network_common import error
 
@@ -58,7 +58,7 @@ class MultiworldClient(QObject):
     _all_data: dict[uuid.UUID, Data] | None = None
     _persist_path: Path
     _notify_task: asyncio.Task | None = None
-    _remote_games: dict[uuid.UUID, GameSessionPickups]
+    _remote_games: dict[uuid.UUID, MultiplayerPickups]
     PendingUploadCount = Signal(int)
 
     def __init__(self, network_client: QtNetworkClient, game_connection: GameConnection):
@@ -170,8 +170,8 @@ class MultiworldClient(QObject):
     async def on_game_state_updated(self, state: ConnectedGameState):
         await self._on_new_state()
 
-    @asyncSlot(GameSessionPickups)
-    async def on_network_game_updated(self, pickups: GameSessionPickups):
+    @asyncSlot(MultiplayerPickups)
+    async def on_network_game_updated(self, pickups: MultiplayerPickups):
         async with self._pickups_lock:
             self._remote_games[pickups.id] = pickups
         await self._on_new_state()

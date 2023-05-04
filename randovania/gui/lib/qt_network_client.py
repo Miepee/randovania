@@ -9,8 +9,8 @@ from PySide6.QtWidgets import QWidget
 
 import randovania
 from randovania.gui.lib import async_dialog
-from randovania.network_client.game_session import GameSessionEntry, User, GameSessionActions, GameSessionPickups, \
-    GameSessionAuditLog, GameSessionInventory
+from randovania.network_client.multiplayer_session import MultiplayerSessionEntry, User, MultiplayerWorldActions, MultiplayerPickups, \
+    MultiplayerSessionAuditLog, WorldUserInventory
 from randovania.network_client.network_client import NetworkClient, ConnectionState, UnableToConnect
 from randovania.network_common.error import (InvalidAction, NotAuthorizedForAction, ServerError, RequestTimeout,
                                              NotLoggedIn, UserNotAuthorized, UnsupportedClient)
@@ -22,12 +22,11 @@ class QtNetworkClient(QWidget, NetworkClient):
     Disconnect = Signal()
     UserChanged = Signal(User)
     ConnectionStateUpdated = Signal(ConnectionState)
-    GameSessionMetaUpdated = Signal(GameSessionEntry)
-    GameSessionActionsUpdated = Signal(GameSessionActions)
-    GameSessionPickupsUpdated = Signal(GameSessionPickups)
-    GameSessionAuditLogUpdated = Signal(GameSessionAuditLog)
-    GameSessionInventoryUpdated = Signal(GameSessionInventory)
-    GameUpdateNotification = Signal()
+    GameSessionMetaUpdated = Signal(MultiplayerSessionEntry)
+    GameSessionActionsUpdated = Signal(MultiplayerWorldActions)
+    GameSessionPickupsUpdated = Signal(MultiplayerPickups)
+    GameSessionAuditLogUpdated = Signal(MultiplayerSessionAuditLog)
+    GameSessionInventoryUpdated = Signal(WorldUserInventory)
 
     discord: pypresence.AioClient | None = None
 
@@ -58,23 +57,23 @@ class QtNetworkClient(QWidget, NetworkClient):
         await super().on_user_session_updated(new_session)
         self.UserChanged.emit(self.current_user)
 
-    async def on_game_session_meta_update(self, entry: GameSessionEntry):
+    async def on_game_session_meta_update(self, entry: MultiplayerSessionEntry):
         await super().on_game_session_meta_update(entry)
         self.GameSessionMetaUpdated.emit(entry)
 
-    async def on_game_session_actions_update(self, actions: GameSessionActions):
+    async def on_game_session_actions_update(self, actions: MultiplayerWorldActions):
         await super().on_game_session_actions_update(actions)
         self.GameSessionActionsUpdated.emit(actions)
 
-    async def on_game_session_pickups_update(self, pickups: GameSessionPickups):
+    async def on_game_session_pickups_update(self, pickups: MultiplayerPickups):
         await super().on_game_session_pickups_update(pickups)
         self.GameSessionPickupsUpdated.emit(pickups)
 
-    async def on_game_session_audit_update(self, audit_log: GameSessionAuditLog):
+    async def on_game_session_audit_update(self, audit_log: MultiplayerSessionAuditLog):
         await super().on_game_session_audit_update(audit_log)
         self.GameSessionAuditLogUpdated.emit(audit_log)
 
-    async def on_game_session_inventory(self, inventory: GameSessionInventory):
+    async def on_game_session_inventory(self, inventory: WorldUserInventory):
         await super().on_game_session_inventory(inventory)
         self.GameSessionInventoryUpdated.emit(inventory)
 
@@ -104,9 +103,6 @@ class QtNetworkClient(QWidget, NetworkClient):
 
         new_session = await self._emit_with_result("login_with_guest", login_request)
         await self.on_user_session_updated(new_session)
-
-    async def on_game_update_notification(self, details):
-        self.GameUpdateNotification.emit()
 
     @property
     def available_login_methods(self) -> set[str]:

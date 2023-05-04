@@ -4,18 +4,18 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QPushButton, QDialogButtonBox, QDialog, QTableWidgetItem, QInputDialog, QLineEdit
 from qasync import asyncSlot
 
-from randovania.gui.generated.game_session_browser_dialog_ui import Ui_GameSessionBrowserDialog
+from randovania.gui.generated.multiplayer_session_browser_dialog_ui import Ui_MultiplayerSessionBrowserDialog
 from randovania.gui.lib import common_qt_lib, async_dialog
 from randovania.gui.lib.qt_network_client import handle_network_errors, QtNetworkClient
-from randovania.network_client.game_session import GameSessionListEntry
+from randovania.network_client.multiplayer_session import MultiplayerSessionListEntry
 from randovania.network_client.network_client import ConnectionState
 from randovania.network_common.error import WrongPassword
-from randovania.network_common.session_state import GameSessionState
+from randovania.network_common.session_state import MultiplayerSessionState
 
 
-class GameSessionBrowserDialog(QDialog, Ui_GameSessionBrowserDialog):
-    sessions: list[GameSessionListEntry]
-    visible_sessions: list[GameSessionListEntry]
+class OnlineGameListDialog(QDialog, Ui_MultiplayerSessionBrowserDialog):
+    sessions: list[MultiplayerSessionListEntry]
+    visible_sessions: list[MultiplayerSessionListEntry]
 
     def __init__(self, network_client: QtNetworkClient):
         super().__init__()
@@ -24,9 +24,9 @@ class GameSessionBrowserDialog(QDialog, Ui_GameSessionBrowserDialog):
         self.network_client = network_client
 
         self.refresh_button = QPushButton("Refresh")
-        self.button_box.addButton(self.refresh_button, QDialogButtonBox.ResetRole)
-        self.button_box.button(QDialogButtonBox.Ok).setEnabled(False)
-        self.button_box.button(QDialogButtonBox.Ok).setText("Join")
+        self.button_box.addButton(self.refresh_button, QDialogButtonBox.ButtonRole.ResetRole)
+        self.button_box.button(QDialogButtonBox.StandardButton.Ok).setEnabled(False)
+        self.button_box.button(QDialogButtonBox.StandardButton.Ok).setText("Join")
 
         self.button_box.accepted.connect(self.attempt_join)
         self.button_box.rejected.connect(self.reject)
@@ -66,10 +66,12 @@ class GameSessionBrowserDialog(QDialog, Ui_GameSessionBrowserDialog):
         await self.refresh(ignore_limit=True)
 
     def on_selection_changed(self):
-        self.button_box.button(QDialogButtonBox.Ok).setEnabled(len(self.table_widget.selectedItems()) > 0)
+        self.button_box.button(QDialogButtonBox.StandardButton.Ok).setEnabled(
+            len(self.table_widget.selectedItems()) > 0
+        )
 
     @property
-    def selected_session(self) -> GameSessionListEntry:
+    def selected_session(self) -> MultiplayerSessionListEntry:
         return self.table_widget.selectedItems()[0].data(Qt.UserRole)
 
     @asyncSlot(QTableWidgetItem)
@@ -89,7 +91,7 @@ class GameSessionBrowserDialog(QDialog, Ui_GameSessionBrowserDialog):
             dialog.setWindowTitle("Enter password")
             dialog.setLabelText("This session requires a password:")
             dialog.setWindowModality(Qt.WindowModal)
-            dialog.setTextEchoMode(QLineEdit.Password)
+            dialog.setTextEchoMode(QLineEdit.EchoMode.Password)
 
             if await async_dialog.execute_dialog(dialog) != QDialog.DialogCode.Accepted:
                 return
@@ -119,9 +121,9 @@ class GameSessionBrowserDialog(QDialog, Ui_GameSessionBrowserDialog):
             displayed_has_password.add(False)
 
         displayed_states = set()
-        for (check, state) in ((self.state_setup_check, GameSessionState.SETUP),
-                               (self.state_inprogress_check, GameSessionState.IN_PROGRESS),
-                               (self.state_finished_check, GameSessionState.FINISHED)):
+        for (check, state) in ((self.state_setup_check, MultiplayerSessionState.SETUP),
+                               (self.state_inprogress_check, MultiplayerSessionState.IN_PROGRESS),
+                               (self.state_finished_check, MultiplayerSessionState.FINISHED)):
             if check.isChecked():
                 displayed_states.add(state)
 

@@ -62,7 +62,7 @@ async def test_look_for_permalinks(mocker, is_solo, has_multiple, is_dev_version
     permalink_1.randovania_version = randovania.GIT_HASH
     permalink_1.parameters.player_count = 1 if is_solo else 2
     permalink_1.parameters.get_preset.return_value = preset
-    permalink_1.parameters.presets = [preset] if is_solo else [preset, preset]
+    permalink_1.parameters.worlds = [preset] if is_solo else [preset, preset]
     permalink_2 = MagicMock()
     permalink_2.randovania_version = randovania.GIT_HASH
     embed = MagicMock()

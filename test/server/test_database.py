@@ -3,7 +3,7 @@ from peewee import SqliteDatabase
 
 from randovania.layout.layout_description import LayoutDescription
 from randovania.lib import construct_lib
-from randovania.network_common.binary_formats import BinaryGameSessionEntry
+from randovania.network_common.binary_formats import BinaryMultiplayerSessionEntry
 from randovania.server import database
 
 
@@ -19,7 +19,7 @@ def test_GameSession_create_session_entry(clean_database, has_description, test_
     # Setup
     description = LayoutDescription.from_file(test_files_dir.joinpath("log_files", "seed_a.rdvgame"))
     someone = database.User.create(name="Someone")
-    s = database.GameSession.create(name="Debug", num_teams=1, creator=someone)
+    s = database.MultiplayerSession.create(name="Debug", num_teams=1, creator=someone)
     game_details = None
     if has_description:
         s.layout_description = description
@@ -31,9 +31,9 @@ def test_GameSession_create_session_entry(clean_database, has_description, test_
         }
 
     # Run
-    session = database.GameSession.get_by_id(1)
+    session = database.MultiplayerSession.get_by_id(1)
     result = session.create_session_entry()
-    readable_result = construct_lib.convert_to_raw_python(BinaryGameSessionEntry.parse(result))
+    readable_result = construct_lib.convert_to_raw_python(BinaryMultiplayerSessionEntry.parse(result))
 
     # Assert
     assert readable_result == {

@@ -7,7 +7,9 @@ import werkzeug.middleware.proxy_fix
 from flask_socketio import ConnectionRefusedError
 
 import randovania
-from randovania.server import game_session, user_session, database, client_check
+import randovania.server.multiplayer.world_api
+from randovania.server import multiplayer_session, user_session, database, client_check
+from randovania.server.multiplayer import world_api
 from randovania.server.server_app import ServerApp
 
 
@@ -102,7 +104,6 @@ def create_app():
         app.logger.info(f"Client at {sio.current_client_ip(sid)} disconnected.")
 
         session = sio.get_server().get_session(sid)
-        if "user-id" in session:
-            game_session.report_user_disconnected(sio, session["user-id"], app.logger)
+        world_api.report_disconnect(sio, session, app.logger)
 
     return app
