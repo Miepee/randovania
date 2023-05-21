@@ -18,7 +18,7 @@ from randovania.layout.preset import Preset
 from randovania.layout.versioned_preset import VersionedPreset
 from randovania.network_client.multiplayer_session import MultiplayerSessionEntry, MultiplayerUser, GameDetails, \
     MultiplayerWorld
-from randovania.network_common.binary_formats import BinaryMultiplayerSessionEntry, BinaryGameSessionActions, \
+from randovania.network_common.binary_formats import BinaryGameSessionActions, \
     BinaryGameSessionAuditLog
 from randovania.network_common.session_state import MultiplayerSessionState
 
@@ -244,11 +244,13 @@ class MultiplayerSession(BaseModel):
 
 
 class World(BaseModel):
+    id: int
     session: MultiplayerSession = peewee.ForeignKeyField(MultiplayerSession, backref="worlds")
     uuid: uuid.UUID = peewee.UUIDField(default=uuid.uuid4, unique=True)
 
     name: str = peewee.CharField()
     preset: str = peewee.TextField()
+    order: int | None = peewee.IntegerField(null=True, default=None)
 
     @classmethod
     def get_by_uuid(cls, uid) -> World:
@@ -262,6 +264,13 @@ class WorldUserAssociation(BaseModel):
 
     connection_state = peewee.TextField(null=True)
     inventory = peewee.BlobField(null=True)
+
+    @classmethod
+    def get_by_ids(cls, world_uid: uuid.UUID, user_id: int) -> Self:
+        return cls.get(
+            WorldUserAssociation.world.uuid == world_uid,
+            WorldUserAssociation.user == user_id,
+        )
 
     class Meta:
         primary_key = peewee.CompositeKey('world', 'user')

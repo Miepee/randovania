@@ -110,7 +110,7 @@ async def test_session_admin_global(client):
     client._current_game_session_meta.id = 1234
 
     # Run
-    result = await client.session_admin_global(SessionAdminGlobalAction.CHANGE_ROW, 5)
+    result = await client.session_admin_global(SessionAdminGlobalAction.CHANGE_WORLD, 5)
 
     # Assert
     assert result == client._emit_with_result.return_value

@@ -19,73 +19,28 @@ from randovania.interface_common.players_configuration import PlayersConfigurati
 from randovania.layout.layout_description import LayoutDescription
 from randovania.layout.versioned_preset import VersionedPreset
 from randovania.network_common.admin_actions import SessionAdminGlobalAction, SessionAdminUserAction
-from randovania.network_common.error import (WrongPassword, NotAuthorizedForAction, InvalidAction)
+from randovania.network_common.error import (NotAuthorizedForAction, InvalidAction)
 from randovania.network_common.pickup_serializer import BitPackPickupEntry
 from randovania.network_common.session_state import MultiplayerSessionState
 from randovania.server import database
 from randovania.server.database import (MultiplayerSession, MultiplayerMembership, WorldAction, World,
-                                        MultiplayerAuditEntry, is_boolean)
+                                        MultiplayerAuditEntry, is_boolean, WorldUserAssociation)
 from randovania.server.lib import logger
-from randovania.server.multiplayer.session_common import emit_inventory_update, describe_session, \
-    emit_session_meta_update, emit_session_actions_update, emit_session_audit_update, add_audit_entry
+from randovania.server.multiplayer.session_common import describe_session, \
+    emit_session_meta_update, add_audit_entry
 from randovania.server.server_app import ServerApp
 
 
-def list_game_sessions(sio: ServerApp, limit: int | None):
-    return [
-        session.create_list_entry()
-        for session in MultiplayerSession.select().order_by(MultiplayerSession.id.desc()).limit(limit)
-    ]
-
-
-def create_game_session(sio: ServerApp, session_name: str):
-    current_user = sio.get_current_user()
-
-    with database.db.atomic():
-        new_session: MultiplayerSession = MultiplayerSession.create(
-            name=session_name,
-            password=None,
-            creator=current_user,
-        )
-        membership = MultiplayerMembership.create(
-            user=sio.get_current_user(),
-            session=new_session,
-            admin=True,
-        )
-
-    sio.join_game_session(membership)
-    return new_session.create_session_entry().as_json
-
-
-def join_game_session(sio: ServerApp, session_id: int, password: str | None):
-    session: MultiplayerSession = MultiplayerSession.get_by_id(session_id)
-
-    if session.password is not None:
-        if password is None or _hash_password(password) != session.password:
-            raise WrongPassword()
-    elif password is not None:
-        raise WrongPassword()
-
-    membership = MultiplayerMembership.get_or_create(user=sio.get_current_user(), session=session,
-                                                     defaults={"row": None, "admin": False,
-                                                               "connection_state": "Online, Unknown"})[0]
-
-    emit_session_meta_update(session)
-    sio.join_game_session(membership)
-
-    return session.create_session_entry().as_json
-
-
-def disconnect_game_session(sio: ServerApp, session_id: int):
-    current_user = sio.get_current_user()
-    try:
-        current_membership = MultiplayerMembership.get_by_ids(current_user.id, session_id)
-        current_membership.connection_state = "Offline"
-        current_membership.save()
-        emit_session_meta_update(current_membership.session)
-    except peewee.DoesNotExist:
-        pass
-    sio.leave_game_session()
+# def disconnect_game_session(sio: ServerApp, session_id: int):
+#     current_user = sio.get_current_user()
+#     try:
+#         current_membership = MultiplayerMembership.get_by_ids(current_user.id, session_id)
+#         current_membership.connection_state = "Offline"
+#         current_membership.save()
+#         emit_session_meta_update(current_membership.session)
+#     except peewee.DoesNotExist:
+#         pass
+#     sio.leave_game_session()
 
 
 def _verify_has_admin(sio: ServerApp, session_id: int, admin_user_id: int | None,
@@ -122,6 +77,11 @@ def _verify_no_layout_description(session: MultiplayerSession):
         raise InvalidAction("Session has a generated game")
 
 
+def _verify_not_in_generation(session: MultiplayerSession):
+    if session.generation_in_progress is not None:
+        raise InvalidAction("Session game is being generated")
+
+
 def _get_preset(preset_json: dict) -> VersionedPreset:
     try:
         preset = VersionedPreset(preset_json)
@@ -131,41 +91,30 @@ def _get_preset(preset_json: dict) -> VersionedPreset:
         raise InvalidAction(f"invalid preset: {e}")
 
 
-def game_session_request_update(sio: ServerApp, session_id: int):
-    current_user = sio.get_current_user()
-    session: MultiplayerSession = MultiplayerSession.get_by_id(session_id)
-    membership = MultiplayerMembership.get_by_ids(current_user.id, session_id)
-
-    emit_session_meta_update(session)
-    if session.layout_description_json is not None:
-        emit_session_actions_update(session)
-
-    if not membership.is_observer and session.state != MultiplayerSessionState.SETUP:
-        emit_game_session_pickups_update(sio, membership)
-
-    emit_session_audit_update(session)
-
-
-def _create_world(sio: ServerApp, session: MultiplayerSession, preset_json: dict):
+def _create_world(sio: ServerApp, session: MultiplayerSession, arg: tuple[str, dict]):
+    if len(arg) != 2:
+        raise InvalidAction("Missing arguments.")
     _verify_has_admin(sio, session.id, None)
     _verify_in_setup(session)
     _verify_no_layout_description(session)
+    _verify_not_in_generation(session)
+    name, preset_json = arg
     preset = _get_preset(preset_json)
 
-    new_row_id = session.num_rows
     with database.db.atomic():
-        logger().info(f"{describe_session(session)}: Creating row {new_row_id}.")
-        World.create(session=session, row=new_row_id,
+        logger().info(f"{describe_session(session)}: Creating world {name}.")
+        World.create(session=session, name=name,
                      preset=json.dumps(preset.as_json))
 
 
-def _change_row(sio: ServerApp, session: MultiplayerSession, arg: tuple[int, dict]):
+def _change_world(sio: ServerApp, session: MultiplayerSession, arg: tuple[uuid.UUID, dict]):
     if len(arg) != 2:
         raise InvalidAction("Missing arguments.")
-    row_id, preset_json = arg
+    world_uid, preset_json = arg
     _verify_has_admin(sio, session.id, sio.get_current_user().id)
     _verify_in_setup(session)
     _verify_no_layout_description(session)
+    _verify_not_in_generation(session)
     preset = _get_preset(preset_json)
 
     if preset.game not in session.allowed_games:
@@ -176,57 +125,73 @@ def _change_row(sio: ServerApp, session: MultiplayerSession, arg: tuple[int, dic
 
     try:
         with database.db.atomic():
-            preset_row = World.get(World.session == session,
-                                   World.row == row_id)
-            preset_row.preset = json.dumps(preset.as_json)
-            logger().info(f"{describe_session(session)}: Changing row {row_id}.")
-            preset_row.save()
+            world = World.get_by_uuid(world_uid)
+            world.preset = json.dumps(preset.as_json)
+            logger().info(f"{describe_session(session)}: Changing world {world_uid}.")
+            world.save()
 
     except peewee.DoesNotExist:
-        raise InvalidAction(f"invalid row: {row_id}")
+        raise InvalidAction(f"invalid world: {world_uid}")
 
 
-def _delete_row(sio: ServerApp, session: MultiplayerSession, row_id: int):
+def _delete_world(sio: ServerApp, session: MultiplayerSession, world_uid: uuid.UUID):
     _verify_has_admin(sio, session.id, None)
     _verify_in_setup(session)
     _verify_no_layout_description(session)
+    _verify_not_in_generation(session)
 
-    if session.num_rows < 2:
-        raise InvalidAction("Can't delete row when there's only one")
-
-    if row_id != session.num_rows - 1:
-        raise InvalidAction("Can only delete the last row")
-
+    world = World.get_by_uuid(world_uid)
     with database.db.atomic():
-        logger().info(f"{describe_session(session)}: Deleting {row_id}.")
-        World.delete().where(World.session == session,
-                             World.row == row_id).execute()
-        MultiplayerMembership.update(row=None).where(
-            MultiplayerMembership.session == session.id,
-            MultiplayerMembership.row == row_id,
-        ).execute()
+        logger().info(f"{describe_session(session)}: Deleting {world_uid}.")
+        WorldUserAssociation.delete().where(WorldUserAssociation.world == world.id).execute()
+        World.delete().where(World.id == world.id).execute()
 
 
-def _update_layout_generation(sio: ServerApp, session: MultiplayerSession, active: bool):
+def _update_layout_generation(sio: ServerApp, session: MultiplayerSession, world_order: list[int]):
     _verify_has_admin(sio, session.id, None)
     _verify_in_setup(session)
 
-    if active:
-        if session.generation_in_progress is None:
-            session.generation_in_progress = sio.get_current_user()
-        else:
-            raise InvalidAction(f"Generation already in progress by {session.generation_in_progress.name}.")
-    else:
-        session.generation_in_progress = None
+    world_objects: dict[int, World] = {
+        world.id: world
+        for world in session.worlds
+    }
+    if world_order:
+        used_ids = set(world_objects.keys())
+        for world_id in world_order:
+            if world_id not in used_ids:
+                raise InvalidAction(f"World {world_id} duplicated in order, or unknown.")
+            used_ids.remove(world_id)
 
-    logger().info(f"{describe_session(session)}: Making generation in progress to {session.generation_in_progress}.")
-    session.save()
+        if used_ids:
+            raise InvalidAction(f"Expected {len(world_objects)} worlds, got {len(world_order)}.")
+
+        if session.generation_in_progress is not None:
+            raise InvalidAction(f"Generation already in progress by {session.generation_in_progress.name}.")
+
+    with database.db.atomic():
+        if world_order:
+            session.generation_in_progress = sio.get_current_user()
+            for i, world_id in enumerate(world_order):
+                world_objects[world_id].order = i
+                world_objects[world_id].save()
+        else:
+            session.generation_in_progress = None
+
+        logger().info(
+            f"{describe_session(session)}: Making generation in progress to {session.generation_in_progress}."
+        )
+        session.save()
+
+
+def _get_sorted_worlds(session: MultiplayerSession) -> list[World]:
+    return list(World.select().where(World.session == session
+                                     ).order_by(World.session.asc()))
 
 
 def _change_layout_description(sio: ServerApp, session: MultiplayerSession, description_json: dict | None):
     _verify_has_admin(sio, session.id, None)
     _verify_in_setup(session)
-    rows_to_update = []
+    worlds_to_update = []
 
     if description_json is None:
         description = None
@@ -239,31 +204,32 @@ def _change_layout_description(sio: ServerApp, session: MultiplayerSession, desc
 
         _verify_no_layout_description(session)
         description = LayoutDescription.from_json_dict(description_json)
-        if description.player_count != session.num_rows:
-            raise InvalidAction(f"Description is for a {description.player_count} players,"
-                                f" while the session is for {session.num_rows}.")
+        worlds = _get_sorted_worlds(session)
 
-        for permalink_preset, preset_row in zip(description.all_presets, session.presets):
-            preset_row = typing.cast(World, preset_row)
-            if _get_preset(json.loads(preset_row.preset)).get_preset() != permalink_preset:
+        if description.player_count != len(worlds):
+            raise InvalidAction(f"Description is for a {description.player_count} players,"
+                                f" while the session is for {len(worlds)}.")
+
+        for permalink_preset, world in zip(description.all_presets, worlds):
+            if _get_preset(json.loads(world.preset)).get_preset() != permalink_preset:
                 preset = VersionedPreset.with_preset(permalink_preset)
                 if preset.game not in session.allowed_games:
                     raise InvalidAction(f"{preset.game} preset not allowed.")
                 if not randovania.is_dev_version() and permalink_preset.configuration.unsupported_features():
                     raise InvalidAction(f"Preset {permalink_preset.name} uses unsupported features.")
-                preset_row.preset = json.dumps(preset.as_json)
-                rows_to_update.append(preset_row)
+                world.preset = json.dumps(preset.as_json)
+                worlds_to_update.append(world)
 
     with database.db.atomic():
-        for preset_row in rows_to_update:
+        for preset_row in worlds_to_update:
             preset_row.save()
 
         session.generation_in_progress = None
         session.layout_description = description
         session.save()
         add_audit_entry(sio, session,
-                         "Removed generated game" if description is None
-                         else f"Set game to {description.shareable_word_hash}")
+                        "Removed generated game" if description is None
+                        else f"Set game to {description.shareable_word_hash}")
 
 
 def _download_layout_description(sio: ServerApp, session: MultiplayerSession):
@@ -386,14 +352,14 @@ def game_session_admin_session(sio: ServerApp, session_id: int, action: str, arg
     action: SessionAdminGlobalAction = SessionAdminGlobalAction(action)
     session: database.MultiplayerSession = database.MultiplayerSession.get_by_id(session_id)
 
-    if action == SessionAdminGlobalAction.CREATE_ROW:
+    if action == SessionAdminGlobalAction.CREATE_WORLD:
         _create_world(sio, session, arg)
 
-    elif action == SessionAdminGlobalAction.CHANGE_ROW:
-        _change_row(sio, session, arg)
+    elif action == SessionAdminGlobalAction.CHANGE_WORLD:
+        _change_world(sio, session, arg)
 
-    elif action == SessionAdminGlobalAction.DELETE_ROW:
-        _delete_row(sio, session, arg)
+    elif action == SessionAdminGlobalAction.DELETE_WORLD:
+        _delete_world(sio, session, arg)
 
     elif action == SessionAdminGlobalAction.UPDATE_LAYOUT_GENERATION:
         _update_layout_generation(sio, session, arg)
@@ -451,8 +417,8 @@ def game_session_admin_player(sio: ServerApp, session_id: int, user_id: int, act
 
     if action == SessionAdminUserAction.KICK:
         add_audit_entry(sio, session,
-                         f"Kicked {membership.effective_name}" if membership.user != sio.get_current_user()
-                         else "Left session")
+                        f"Kicked {membership.effective_name}" if membership.user != sio.get_current_user()
+                        else "Left session")
         membership.delete_instance()
         if not list(session.players):
             session.delete_instance(recursive=True)
@@ -488,7 +454,7 @@ def game_session_admin_player(sio: ServerApp, session_id: int, user_id: int, act
             membership.inventory = None
             membership.save()
 
-    elif action == SessionAdminUserAction.SWITCH_IS_OBSERVER:
+    elif action == SessionAdminUserAction.ASSOCIATE:
         if membership.is_observer:
             membership.row = _find_empty_row(session)
         else:
@@ -652,29 +618,7 @@ def emit_game_session_pickups_update(sio: ServerApp, membership: MultiplayerMemb
     flask_socketio.emit("game_session_pickups_update", data, room=f"game-session-{session.id}-{membership.user.id}")
 
 
-def game_session_watch_row_inventory(sio: ServerApp, session_id: int, row: int, watch: bool, binary: bool):
-    current_user = sio.get_current_user()
-    session = MultiplayerSession.get_by_id(session_id)
-    MultiplayerMembership.get_by_ids(current_user.id, session_id)
-
-    if not (0 <= row < session.num_rows):
-        raise InvalidAction(f"Invalid row {row}")
-
-    data_format = "binary" if binary else "json"
-    room = f"game-session-{session_id}-{data_format}-inventory"
-    if watch:
-        flask_socketio.join_room(room)
-        emit_inventory_update(MultiplayerMembership.get_by_session_position(session, row))
-    else:
-        flask_socketio.leave_room(room)
-
-
 def setup_app(sio: ServerApp):
-    sio.on("list_game_sessions", list_game_sessions, with_header_check=True)
-    sio.on("create_game_session", create_game_session, with_header_check=True)
-    sio.on("join_game_session", join_game_session, with_header_check=True)
-    sio.on("disconnect_game_session", disconnect_game_session)
-    sio.on("game_session_request_update", game_session_request_update)
+    # sio.on("disconnect_game_session", disconnect_game_session)
     sio.on("game_session_admin_session", game_session_admin_session)
     sio.on("game_session_admin_player", game_session_admin_player)
-    sio.on("game_session_watch_row_inventory", game_session_watch_row_inventory)

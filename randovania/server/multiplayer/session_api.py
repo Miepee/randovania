@@ -1,0 +1,80 @@
+import uuid
+
+import flask_socketio
+
+from randovania.network_common.error import WrongPassword
+from randovania.server import database
+from randovania.server.database import MultiplayerSession, MultiplayerMembership, WorldUserAssociation, World
+from randovania.server.multiplayer import session_common
+from randovania.server.server_app import ServerApp
+
+
+def list_sessions(sio: ServerApp, limit: int | None):
+    return [
+        session.create_list_entry()
+        for session in MultiplayerSession.select().order_by(MultiplayerSession.id.desc()).limit(limit)
+    ]
+
+
+def create_game_session(sio: ServerApp, session_name: str):
+    current_user = sio.get_current_user()
+
+    with database.db.atomic():
+        new_session: MultiplayerSession = MultiplayerSession.create(
+            name=session_name,
+            password=None,
+            creator=current_user,
+        )
+        membership = MultiplayerMembership.create(
+            user=sio.get_current_user(),
+            session=new_session,
+            admin=True,
+        )
+
+    sio.join_game_session(membership)
+    return new_session.create_session_entry().as_json
+
+
+def join_session(sio: ServerApp, session_id: int, password: str | None):
+    session: MultiplayerSession = MultiplayerSession.get_by_id(session_id)
+
+    if session.password is not None:
+        if password is None or session_common.hash_password(password) != session.password:
+            raise WrongPassword()
+    elif password is not None:
+        raise WrongPassword()
+
+    membership = MultiplayerMembership.get_or_create(user=sio.get_current_user(), session=session,
+                                                     defaults={"row": None, "admin": False,
+                                                               "connection_state": "Online, Unknown"})[0]
+
+    session_common.emit_session_meta_update(session)
+    sio.join_game_session(membership)
+
+    return session.create_session_entry().as_json
+
+
+def listen_to_events(sio: ServerApp, session_id: int, listen: bool):
+    # TODO
+    sio.leave_game_session()
+    pass
+
+
+def request_session_update(sio: ServerApp, session_id: int):
+    session: MultiplayerSession = MultiplayerSession.get_by_id(session_id)
+
+    session_common.emit_session_meta_update(session)
+    if session.layout_description_json is not None:
+        session_common.emit_session_actions_update(session)
+
+    session_common.emit_session_audit_update(session)
+
+
+def setup_app(sio: ServerApp):
+    sio.on("multiplayer/list_sessions", list_sessions, with_header_check=True)
+    sio.on("multiplayer/create_session", create_game_session, with_header_check=True)
+    sio.on("multiplayer/join_session", join_session, with_header_check=True)
+    sio.on("multiplayer/listen_to_events", listen_to_events)
+    sio.on("multiplayer/request_session_update", request_session_update)
+    # sio.on("game_session_admin_session", game_session_admin_session)
+    # sio.on("game_session_admin_player", game_session_admin_player)

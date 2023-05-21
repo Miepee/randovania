@@ -173,19 +173,19 @@ class MultiplayerSessionUsersWidget(QtWidgets.QTreeWidget):
     #
 
     @asyncSlot()
-    async def _new_game(self, game: RandovaniaGame):
+    async def _new_game(self, game: RandovaniaGame, user_id: int):
         preset = await self._prompt_for_preset(game)
         if preset is None:
             return
 
-        you = [player for player in self._game_session.users if player.id == self.your_id][0]
-        if not you.worlds:
-            new_name = you.name
+        user = [player for player in self._game_session.users if player.id == user_id][0]
+        if not user.worlds:
+            new_name = user.name
         else:
-            new_name = f"{you.name} ({len(you.worlds) + 1})"
+            new_name = f"{user.name} ({len(user.worlds) + 1})"
 
         # Temp
-        await self._session_api.create_new_preset(new_name, preset)
+        await self._session_api.create_new_preset(new_name, preset, user_id)
 
     #
 
@@ -196,11 +196,11 @@ class MultiplayerSessionUsersWidget(QtWidgets.QTreeWidget):
                 self._preset_replace, g, preset_id,
             )
 
-    def _fill_menu_for_new_game(self, menu: QtWidgets.QMenu):
+    def _fill_menu_for_new_game(self, menu: QtWidgets.QMenu, user: int):
         for g in RandovaniaGame.all_games():
             connect_to(
                 menu.addAction(g.long_name),
-                self._new_game, g,
+                self._new_game, g, user,
             )
 
     def is_admin(self) -> bool:
@@ -306,7 +306,7 @@ class MultiplayerSessionUsersWidget(QtWidgets.QTreeWidget):
                 new_game_item = QtWidgets.QTreeWidgetItem(item)
                 tool = make_tool("New game")
                 menu = QtWidgets.QMenu(tool)
-                self._fill_menu_for_new_game(menu)
+                self._fill_menu_for_new_game(menu, player.id)
                 tool.setMenu(menu)
                 self.setItemWidget(new_game_item, 0, tool)
 

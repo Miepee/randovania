@@ -128,7 +128,7 @@ class MultiplayerSessionApi(QtCore.QObject):
         print(f"Will delete {preset_id}")
 
     @handle_network_errors
-    def create_new_preset(self, name: str, preset: VersionedPreset):
+    def create_new_preset(self, name: str, preset: VersionedPreset, owner: int | None):
         print(f"Create game named {name}")
 
         # new_preset_id = uuid.uuid4()

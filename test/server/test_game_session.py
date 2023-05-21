@@ -61,7 +61,7 @@ def test_list_game_sessions(clean_database, limit):
     state = MultiplayerSessionState.SETUP.value
 
     # Run
-    result = game_session.list_game_sessions(MagicMock(), limit)
+    result = game_session.list_sessions(MagicMock(), limit)
 
     # Assert
     expected = [
@@ -117,7 +117,7 @@ def test_join_game_session(mock_emit_session_update: MagicMock,
                                           connection_state="Online, Badass")
 
     # Run
-    result = game_session.join_game_session(sio, 1, None)
+    result = game_session.join_session(sio, 1, None)
 
     # Assert
     mock_emit_session_update.assert_called_once_with(session)
@@ -346,7 +346,7 @@ def test_game_session_admin_player_switch_is_observer(clean_database, flask_app,
 
     # Run
     with flask_app.test_request_context():
-        game_session.game_session_admin_player(sio, 1, 1234, SessionAdminUserAction.SWITCH_IS_OBSERVER.value, None)
+        game_session.game_session_admin_player(sio, 1, 1234, SessionAdminUserAction.ASSOCIATE.value, None)
 
     # Assert
     membership = database.MultiplayerMembership.get(user=user1, session=session)
@@ -374,7 +374,7 @@ def test_game_session_admin_player_include_in_session(clean_database, flask_app,
 
     # Run
     with flask_app.test_request_context():
-        game_session.game_session_admin_player(sio, 1, 4234, SessionAdminUserAction.SWITCH_IS_OBSERVER.value, None)
+        game_session.game_session_admin_player(sio, 1, 4234, SessionAdminUserAction.ASSOCIATE.value, None)
 
     # Assert
     membership = database.MultiplayerMembership.get(user=users[3], session=session)
@@ -523,7 +523,7 @@ def test_game_session_admin_session_change_row(mock_emit_session_update: MagicMo
 
     # Run
     with flask_app.test_request_context():
-        game_session.game_session_admin_session(sio, 1, SessionAdminGlobalAction.CHANGE_ROW.value,
+        game_session.game_session_admin_session(sio, 1, SessionAdminGlobalAction.CHANGE_WORLD.value,
                                                 (1, preset_manager.default_preset.as_json))
 
     # Assert
@@ -545,7 +545,7 @@ def test_game_session_admin_session_delete_row(mock_emit_session_update: MagicMo
 
     # Run
     with flask_app.test_request_context():
-        game_session.game_session_admin_session(sio, 1, SessionAdminGlobalAction.DELETE_ROW.value, 1)
+        game_session.game_session_admin_session(sio, 1, SessionAdminGlobalAction.DELETE_WORLD.value, 1)
 
     # Assert
     mock_emit_session_update.assert_called_once_with(session)
@@ -572,7 +572,7 @@ def test_game_session_admin_session_delete_row_invalid(mock_emit_session_update,
 
     # Run
     with pytest.raises(InvalidAction) as e, flask_app.test_request_context():
-        game_session.game_session_admin_session(sio, 1, SessionAdminGlobalAction.DELETE_ROW.value, 0)
+        game_session.game_session_admin_session(sio, 1, SessionAdminGlobalAction.DELETE_WORLD.value, 0)
 
     # Assert
     assert e.value.message == expected_message
@@ -899,7 +899,7 @@ def test_game_session_admin_session_download_permalink(clean_database, mock_emit
 
 def test_change_row_missing_arguments(flask_app):
     with pytest.raises(InvalidAction), flask_app.test_request_context():
-        game_session._change_row(MagicMock(), MagicMock(), (5,))
+        game_session._change_world(MagicMock(), MagicMock(), (5,))
 
 
 def test_verify_in_setup(clean_database, flask_app):
@@ -1066,7 +1066,7 @@ def test_game_session_request_update(session_update, mocker, flask_app):
 
     # Run
     with flask_app.test_request_context():
-        game_session.game_session_request_update(sio, 1)
+        game_session.request_session_update(sio, 1)
 
     # Assert
     mock_meta_update.assert_called_once_with(session_update)

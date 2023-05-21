@@ -1,9 +1,6 @@
 import construct
 from construct import PrefixedArray, VarInt, Struct, CString
 
-from randovania.bitpacking import construct_dataclass
-from randovania.lib.construct_lib import OptionalValue
-
 BinStr = CString("utf-8")
 
 BinaryInventory = Struct(
@@ -17,17 +14,6 @@ BinaryInventory = Struct(
             capacity=VarInt,
         )
     )
-)
-
-BinaryMultiplayerSessionEntry = Struct(
-    id=VarInt,
-    name=BinStr,
-    presets=PrefixedArray(VarInt, BinStr),
-    players=PrefixedArray(VarInt, BinaryPlayerSessionEntry),
-    game_details=OptionalValue(BinaryGameDetails),
-    state=BinStr,
-    generation_in_progress=OptionalValue(VarInt),
-    allowed_games=PrefixedArray(VarInt, BinStr),
 )
 
 BinaryGameSessionAction = Struct(

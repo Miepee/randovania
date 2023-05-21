@@ -1,6 +1,8 @@
 import logging
 import uuid
 
+import flask_socketio
+
 from randovania.network_common.error import InvalidAction
 from randovania.network_common.session_state import MultiplayerSessionState
 from randovania.server.database import MultiplayerMembership, World, WorldUserAssociation, MultiplayerSession
@@ -66,9 +68,23 @@ def world_self_update(sio: ServerApp, world_id: uuid.UUID, inventory: bytes | No
         session_common.emit_session_meta_update(session)
 
 
-def setup_app(sio: ServerApp):
-    sio.on("game_session_collect_locations", game_session_collect_locations)
-    sio.on("game_session_self_update", world_self_update)
+def watch_inventory(sio: ServerApp, world_uid: uuid.UUID, user_id: int, watch: bool, binary: bool):
+    data_format = "binary" if binary else "json"
+    room = f"multiplayer-{world_uid}-{user_id}-{data_format}-inventory"
+    if watch:
+        # current_user = sio.get_current_user()
+        # TODO: check if current user belongs to the same session
+
+        association = WorldUserAssociation.get_by_ids(
+            world_uid=world_uid,
+            user_id=user_id,
+        )
+
+        flask_socketio.join_room(room)
+        session_common.emit_inventory_update(association)
+    else:
+        # Allow one to stop listening even if you're not allowed to start listening
+        flask_socketio.leave_room(room)
 
 
 def report_disconnect(sio: ServerApp, session_dict: dict, log: logging.Logger):
@@ -95,3 +111,9 @@ def report_disconnect(sio: ServerApp, session_dict: dict, log: logging.Logger):
 
     for session in sessions_to_update.values():
         session_common.emit_session_meta_update(session)
+
+
+def setup_app(sio: ServerApp):
+    sio.on("game_session_collect_locations", game_session_collect_locations)
+    sio.on("game_session_self_update", world_self_update)
+    sio.on("multiplayer/watch_inventory", watch_inventory)

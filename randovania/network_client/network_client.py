@@ -23,9 +23,11 @@ from randovania.game_connection.game_connection import GameConnectionStatus
 from randovania.game_description import default_database
 from randovania.game_description.resources.item_resource_info import InventoryItem, Inventory
 from randovania.games.game import RandovaniaGame
-from randovania.network_client.multiplayer_session import (MultiplayerSessionListEntry, MultiplayerSessionEntry, User, MultiplayerWorldActions,
-                                                           MultiplayerWorldAction, MultiplayerPickups, MultiplayerSessionAuditLog,
-                                                           MultiplayerSessionAuditEntry, WorldUserInventory)
+from randovania.network_client.multiplayer_session import (
+    MultiplayerSessionListEntry, MultiplayerSessionEntry, User, MultiplayerWorldActions,
+    MultiplayerWorldAction, MultiplayerPickups, MultiplayerSessionAuditLog,
+    MultiplayerSessionAuditEntry, WorldUserInventory
+)
 from randovania.network_common import connection_headers, error, binary_formats, admin_actions, pickup_serializer
 
 

@@ -1,30 +1,35 @@
+import hashlib
+
 import construct
 import flask_socketio
 
 from randovania.lib.construct_lib import convert_to_raw_python
 from randovania.network_common.binary_formats import BinaryInventory
-from randovania.server.database import MultiplayerMembership, MultiplayerSession, MultiplayerAuditEntry
+from randovania.server.database import MultiplayerMembership, MultiplayerSession, MultiplayerAuditEntry, \
+    WorldUserAssociation
 from randovania.server.lib import logger
 from randovania.server.server_app import ServerApp
 
 
-def emit_inventory_update(membership: MultiplayerMembership):
+def emit_inventory_update(membership: WorldUserAssociation):
     if membership.inventory is None:
         return
 
-    session_id = membership.session.id
-    flask_socketio.emit("game_session_binary_inventory",
-                        (session_id, membership.row, membership.inventory),
-                        room=f"game-session-{session_id}-binary-inventory",
+    room_prefix = f"multiplayer-{membership.world.uuid}-{membership.user.id}-"
+
+    flask_socketio.emit("multiplayer/binary_inventory",
+                        (membership.world.uuid, membership.user.id, membership.inventory),
+                        room=f"{room_prefix}-binary-inventory",
                         namespace="/")
     try:
-        flask_socketio.emit("game_session_json_inventory",
-                            (session_id, membership.row,
+        flask_socketio.emit("multiplayer/json_inventory",
+                            (membership.world.uuid, membership.user.id,
                              convert_to_raw_python(BinaryInventory.parse(membership.inventory))),
-                            room=f"game-session-{session_id}-json-inventory",
+                            room=f"{room_prefix}-json-inventory",
                             namespace="/")
     except construct.ConstructError as e:
-        logger().warning("Unable to encode inventory for session %d, row %d: %s", session_id, membership.row, str(e))
+        logger().warning("Unable to encode inventory for world %s, user %d: %s",
+                         membership.world.uuid, membership.user.id, str(e))
 
 
 def describe_session(session: MultiplayerSession, membership: MultiplayerMembership | None = None) -> str:
@@ -63,3 +68,7 @@ def add_audit_entry(sio: ServerApp, session: MultiplayerSession, message: str):
         message=message
     )
     emit_session_audit_update(session)
+
+
+def hash_password(password: str) -> str:
+    return hashlib.blake2s(password.encode("utf-8")).hexdigest()
