@@ -5,7 +5,7 @@ from playhouse import flask_utils
 from randovania.game_description import default_database
 from randovania.games.game import RandovaniaGame
 from randovania.network_common.binary_formats import BinaryInventory
-from randovania.server.database import MultiplayerSession
+from randovania.server.database import MultiplayerSession, WorldUserAssociation
 from randovania.server.server_app import ServerApp
 
 
@@ -57,49 +57,41 @@ def setup_app(sio: ServerApp):
     @sio.route_with_user("/session/<session_id>", need_admin=True)
     def admin_session(user, session_id):
         session: MultiplayerSession = MultiplayerSession.get_by_id(session_id)
-
         rows = []
-        presets = session.all_presets
 
-        for member in session.members:
-            if member.is_observer:
-                rows.append([
-                    member.effective_name,
-                    member.connection_state,
-                    "Observer",
-                    "",
-                ])
+        associations: list[WorldUserAssociation] = list(WorldUserAssociation.select().where(
+            WorldUserAssociation.world.session == session,
+        ))
+
+        for association in associations:
+            inventory = []
+
+            if association.inventory is not None:
+                try:
+                    parsed_inventory = BinaryInventory.parse(association.inventory)
+                except construct.ConstructError as e:
+                    inventory.append(f"Error parsing: {e}")
+                    parsed_inventory = None
+
+                if parsed_inventory is not None:
+                    db = default_database.resource_database_for(RandovaniaGame(parsed_inventory.game))
+                    for item in parsed_inventory.elements:
+                        if item["amount"] + item["capacity"] > 0:
+                            inventory.append("{} x{}/{}".format(
+                                db.get_item(item["name"]).long_name,
+                                item["amount"], item["capacity"]
+                            ))
             else:
-                preset = presets[member.row]
+                inventory.append("Missing")
 
-                inventory = []
+            rows.append([
+                association.user.name,
+                association.world.name,
+                association.connection_state,
+                ", ".join(inventory),
+            ])
 
-                if member.inventory is not None:
-                    try:
-                        parsed_inventory = BinaryInventory.parse(member.inventory)
-                    except construct.ConstructError as e:
-                        inventory.append(f"Error parsing: {e}")
-                        parsed_inventory = None
-
-                    if parsed_inventory is not None:
-                        db = default_database.resource_database_for(RandovaniaGame(parsed_inventory.game))
-                        for item in parsed_inventory.elements:
-                            if item["amount"] + item["capacity"] > 0:
-                                inventory.append("{} x{}/{}".format(
-                                    db.get_item(item["name"]).long_name,
-                                    item["amount"], item["capacity"]
-                                ))
-                else:
-                    inventory.append("Missing")
-
-                rows.append([
-                    member.effective_name,
-                    member.connection_state,
-                    preset.name,
-                    ", ".join(inventory),
-                ])
-
-        header = ["Name", "Connection State", "Preset", "Inventory"]
+        header = ["User", "World", "Connection State", "Inventory"]
 
         return "<table border='1'><tr>{}</tr>{}</table>".format(
             "".join(f"<th>{h}</th>" for h in header),

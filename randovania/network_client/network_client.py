@@ -29,6 +29,7 @@ from randovania.network_client.multiplayer_session import (
     MultiplayerSessionAuditEntry, WorldUserInventory
 )
 from randovania.network_common import connection_headers, error, binary_formats, admin_actions, pickup_serializer
+from randovania.network_common.signals import SESSION_META_UPDATE, SESSION_ACTIONS_UPDATE
 
 
 class ConnectionState(Enum):
@@ -138,8 +139,8 @@ class NetworkClient:
         self.sio.on('connect_error', self.on_connect_error)
         self.sio.on('disconnect', self.on_disconnect)
         self.sio.on('user_session_update', self.on_user_session_updated)
-        self.sio.on("game_session_meta_update", self._on_game_session_meta_update_raw)
-        self.sio.on("game_session_actions_update", self._on_game_session_actions_update_raw)
+        self.sio.on(SESSION_META_UPDATE, self._on_game_session_meta_update_raw)
+        self.sio.on(SESSION_ACTIONS_UPDATE, self._on_game_session_actions_update_raw)
         self.sio.on("game_session_pickups_update", self._on_game_session_pickups_update_raw)
         self.sio.on("game_session_audit_update", self._on_game_session_audit_update_raw)
         self.sio.on("game_session_binary_inventory", self._on_game_session_inventory_raw)

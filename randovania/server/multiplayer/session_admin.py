@@ -1,54 +1,32 @@
-import base64
-import hashlib
 import json
-import logging
-import typing
 import uuid
 
-import flask_socketio
 import peewee
 
 import randovania
-from randovania.bitpacking import bitpacking
-from randovania.game_description import default_database
-from randovania.game_description.assignment import PickupTarget
-from randovania.game_description.resources.pickup_entry import PickupEntry
-from randovania.game_description.resources.pickup_index import PickupIndex
-from randovania.game_description.resources.resource_database import ResourceDatabase
 from randovania.interface_common.players_configuration import PlayersConfiguration
 from randovania.layout.layout_description import LayoutDescription
 from randovania.layout.versioned_preset import VersionedPreset
 from randovania.network_common.admin_actions import SessionAdminGlobalAction, SessionAdminUserAction
-from randovania.network_common.error import (NotAuthorizedForAction, InvalidAction)
-from randovania.network_common.pickup_serializer import BitPackPickupEntry
+from randovania.network_common.error import NotAuthorizedForAction, InvalidAction
 from randovania.network_common.session_state import MultiplayerSessionState
 from randovania.server import database
-from randovania.server.database import (MultiplayerSession, MultiplayerMembership, WorldAction, World,
-                                        MultiplayerAuditEntry, is_boolean, WorldUserAssociation)
+from randovania.server.database import MultiplayerMembership, is_boolean, MultiplayerSession, World, \
+    WorldUserAssociation, MultiplayerAuditEntry
 from randovania.server.lib import logger
-from randovania.server.multiplayer.session_common import describe_session, \
-    emit_session_meta_update, add_audit_entry
+from randovania.server.multiplayer import session_common
+from randovania.server.multiplayer.session_common import describe_session, get_ordered_worlds, add_audit_entry, \
+    emit_session_meta_update
 from randovania.server.server_app import ServerApp
 
 
-# def disconnect_game_session(sio: ServerApp, session_id: int):
-#     current_user = sio.get_current_user()
-#     try:
-#         current_membership = MultiplayerMembership.get_by_ids(current_user.id, session_id)
-#         current_membership.connection_state = "Offline"
-#         current_membership.save()
-#         emit_session_meta_update(current_membership.session)
-#     except peewee.DoesNotExist:
-#         pass
-#     sio.leave_game_session()
-
-
-def _verify_has_admin(sio: ServerApp, session_id: int, admin_user_id: int | None,
-                      *, allow_when_no_admins: bool = False) -> None:
+def verify_has_admin(sio: ServerApp, session_id: int, admin_user_id: int | None,
+                     *, allow_when_no_admins: bool = False) -> None:
     """
     Checks if the logged user can do admin operations to the given session,
-    :param session_id: The GameSessions id
-    :param admin_user_id: An user id that is exceptionally authorized for this
+    :param sio:
+    :param session_id: The GameSessions id.
+    :param admin_user_id: An user id that is exceptionally authorized for this.
     :param allow_when_no_admins: This action is authorized for non-admins if there are no admins.
     :return:
     """
@@ -94,7 +72,7 @@ def _get_preset(preset_json: dict) -> VersionedPreset:
 def _create_world(sio: ServerApp, session: MultiplayerSession, arg: tuple[str, dict]):
     if len(arg) != 2:
         raise InvalidAction("Missing arguments.")
-    _verify_has_admin(sio, session.id, None)
+    verify_has_admin(sio, session.id, None)
     _verify_in_setup(session)
     _verify_no_layout_description(session)
     _verify_not_in_generation(session)
@@ -111,7 +89,7 @@ def _change_world(sio: ServerApp, session: MultiplayerSession, arg: tuple[uuid.U
     if len(arg) != 2:
         raise InvalidAction("Missing arguments.")
     world_uid, preset_json = arg
-    _verify_has_admin(sio, session.id, sio.get_current_user().id)
+    verify_has_admin(sio, session.id, sio.get_current_user().id)
     _verify_in_setup(session)
     _verify_no_layout_description(session)
     _verify_not_in_generation(session)
@@ -135,7 +113,7 @@ def _change_world(sio: ServerApp, session: MultiplayerSession, arg: tuple[uuid.U
 
 
 def _delete_world(sio: ServerApp, session: MultiplayerSession, world_uid: uuid.UUID):
-    _verify_has_admin(sio, session.id, None)
+    verify_has_admin(sio, session.id, None)
     _verify_in_setup(session)
     _verify_no_layout_description(session)
     _verify_not_in_generation(session)
@@ -148,7 +126,7 @@ def _delete_world(sio: ServerApp, session: MultiplayerSession, world_uid: uuid.U
 
 
 def _update_layout_generation(sio: ServerApp, session: MultiplayerSession, world_order: list[int]):
-    _verify_has_admin(sio, session.id, None)
+    verify_has_admin(sio, session.id, None)
     _verify_in_setup(session)
 
     world_objects: dict[int, World] = {
@@ -183,13 +161,8 @@ def _update_layout_generation(sio: ServerApp, session: MultiplayerSession, world
         session.save()
 
 
-def _get_sorted_worlds(session: MultiplayerSession) -> list[World]:
-    return list(World.select().where(World.session == session
-                                     ).order_by(World.session.asc()))
-
-
 def _change_layout_description(sio: ServerApp, session: MultiplayerSession, description_json: dict | None):
-    _verify_has_admin(sio, session.id, None)
+    verify_has_admin(sio, session.id, None)
     _verify_in_setup(session)
     worlds_to_update = []
 
@@ -204,7 +177,7 @@ def _change_layout_description(sio: ServerApp, session: MultiplayerSession, desc
 
         _verify_no_layout_description(session)
         description = LayoutDescription.from_json_dict(description_json)
-        worlds = _get_sorted_worlds(session)
+        worlds = get_ordered_worlds(session)
 
         if description.player_count != len(worlds):
             raise InvalidAction(f"Description is for a {description.player_count} players,"
@@ -250,17 +223,10 @@ def _download_layout_description(sio: ServerApp, session: MultiplayerSession):
 
 
 def _start_session(sio: ServerApp, session: MultiplayerSession):
-    _verify_has_admin(sio, session.id, None)
+    verify_has_admin(sio, session.id, None)
     _verify_in_setup(session)
     if session.layout_description_json is None:
         raise InvalidAction("Unable to start session, no game is available.")
-
-    num_players = MultiplayerMembership.select().where(MultiplayerMembership.session == session,
-                                                       MultiplayerMembership.row.is_null(False)).count()
-    expected_players = session.num_rows
-    if num_players != expected_players:
-        raise InvalidAction(f"Unable to start session, there are {num_players} but expected {expected_players} "
-                            f"({session.num_rows} x {session.num_teams}).")
 
     session.state = MultiplayerSessionState.IN_PROGRESS
     logger().info(f"{describe_session(session)}: Starting session.")
@@ -269,7 +235,7 @@ def _start_session(sio: ServerApp, session: MultiplayerSession):
 
 
 def _finish_session(sio: ServerApp, session: MultiplayerSession):
-    _verify_has_admin(sio, session.id, None)
+    verify_has_admin(sio, session.id, None)
     if session.state != MultiplayerSessionState.IN_PROGRESS:
         raise InvalidAction("Session is not in progress")
 
@@ -279,16 +245,8 @@ def _finish_session(sio: ServerApp, session: MultiplayerSession):
     add_audit_entry(sio, session, "Finished session")
 
 
-def _reset_session(sio: ServerApp, session: MultiplayerSession):
-    raise InvalidAction("Restart session is not yet implemented.")
-
-
-def _hash_password(password: str) -> str:
-    return hashlib.blake2s(password.encode("utf-8")).hexdigest()
-
-
 def _change_password(sio: ServerApp, session: MultiplayerSession, password: str):
-    _verify_has_admin(sio, session.id, None)
+    verify_has_admin(sio, session.id, None)
 
     session.password = _hash_password(password)
     logger().info(f"{describe_session(session)}: Changing password.")
@@ -297,7 +255,7 @@ def _change_password(sio: ServerApp, session: MultiplayerSession, password: str)
 
 
 def _change_title(sio: ServerApp, session: MultiplayerSession, title: str):
-    _verify_has_admin(sio, session.id, None)
+    verify_has_admin(sio, session.id, None)
 
     old_name = session.name
     session.name = title
@@ -307,7 +265,7 @@ def _change_title(sio: ServerApp, session: MultiplayerSession, title: str):
 
 
 def _duplicate_session(sio: ServerApp, session: MultiplayerSession, new_title: str):
-    _verify_has_admin(sio, session.id, None)
+    verify_has_admin(sio, session.id, None)
 
     current_user = sio.get_current_user()
     add_audit_entry(sio, session, f"Duplicated session as {new_title}")
@@ -321,18 +279,18 @@ def _duplicate_session(sio: ServerApp, session: MultiplayerSession, new_title: s
             seed_hash=session.seed_hash,
             dev_features=session.dev_features,
         )
-        for preset in session.presets:
-            assert isinstance(preset, World)
+        for world in session.worlds:
+            assert isinstance(world, World)
             World.create(
                 session=new_session,
-                row=preset.row,
-                preset=preset.preset,
+                name=world.name,
+                preset=world.preset,
+                order=world.order,
             )
         MultiplayerMembership.create(
             user=current_user,
             session=new_session,
-            row=None, admin=True,
-            connection_state="Offline",
+            admin=True,
         )
         MultiplayerAuditEntry.create(
             session=new_session,
@@ -342,13 +300,13 @@ def _duplicate_session(sio: ServerApp, session: MultiplayerSession, new_title: s
 
 
 def _get_permalink(sio: ServerApp, session: MultiplayerSession) -> str:
-    _verify_has_admin(sio, session.id, None)
+    verify_has_admin(sio, session.id, None)
     add_audit_entry(sio, session, "Requested permalink")
 
     return session.layout_description.permalink.as_base64_str
 
 
-def game_session_admin_session(sio: ServerApp, session_id: int, action: str, arg):
+def admin_session(sio: ServerApp, session_id: int, action: str, arg):
     action: SessionAdminGlobalAction = SessionAdminGlobalAction(action)
     session: database.MultiplayerSession = database.MultiplayerSession.get_by_id(session_id)
 
@@ -376,9 +334,6 @@ def game_session_admin_session(sio: ServerApp, session_id: int, action: str, arg
     elif action == SessionAdminGlobalAction.FINISH_SESSION:
         _finish_session(sio, session)
 
-    elif action == SessionAdminGlobalAction.RESET_SESSION:
-        _reset_session(sio, session)
-
     elif action == SessionAdminGlobalAction.CHANGE_PASSWORD:
         _change_password(sio, session, arg)
 
@@ -398,27 +353,16 @@ def game_session_admin_session(sio: ServerApp, session_id: int, action: str, arg
     emit_session_meta_update(session)
 
 
-def _find_empty_row(session: MultiplayerSession) -> int:
-    possible_rows = set(range(session.num_rows))
-    for member in MultiplayerMembership.non_observer_members(session):
-        possible_rows.remove(member.row)
+def _kick_user(sio: ServerApp, session: MultiplayerSession, membership: MultiplayerMembership, user_id: int):
+    add_audit_entry(sio, session,
+                    f"Kicked {membership.effective_name}" if membership.user != sio.get_current_user()
+                    else "Left session")
 
-    for empty_row in sorted(possible_rows):
-        return empty_row
-    raise InvalidAction("Session is full")
-
-
-def game_session_admin_player(sio: ServerApp, session_id: int, user_id: int, action: str, arg):
-    _verify_has_admin(sio, session_id, user_id)
-    action: SessionAdminUserAction = SessionAdminUserAction(action)
-
-    session: MultiplayerSession = database.MultiplayerSession.get_by_id(session_id)
-    membership = MultiplayerMembership.get_by_ids(user_id, session_id)
-
-    if action == SessionAdminUserAction.KICK:
-        add_audit_entry(sio, session,
-                        f"Kicked {membership.effective_name}" if membership.user != sio.get_current_user()
-                        else "Left session")
+    with database.db.atomic():
+        WorldUserAssociation.delete().where(
+            WorldUserAssociation.world.session == session.id,
+            WorldUserAssociation.user == membership.user.id,
+        ).execute()
         membership.delete_instance()
         if not list(session.players):
             session.delete_instance(recursive=True)
@@ -426,84 +370,106 @@ def game_session_admin_player(sio: ServerApp, session_id: int, user_id: int, act
         else:
             logger().info(f"{describe_session(session)}. Kicking user {user_id}.")
 
-    elif action == SessionAdminUserAction.MOVE:
-        offset: int = arg
-        if membership.is_observer is None:
-            raise InvalidAction("Player is an observer")
 
-        new_row = membership.row + offset
-        if new_row < 0:
-            raise InvalidAction("New position is negative")
-        if new_row >= session.num_rows:
-            raise InvalidAction("New position is beyond num of rows")
+def _claim_world(sio: ServerApp, session: MultiplayerSession, user_id: int, world_uid: uuid.UUID):
+    if not session.allow_everyone_claim_world:
+        verify_has_admin(sio, session.id, None)
 
-        team_members = [None] * session.num_rows
-        for member in MultiplayerMembership.non_observer_members(session):
-            team_members[member.row] = member
+    world = World.get_by_uuid(world_uid)
 
-        while (0 <= new_row < session.num_rows) and team_members[new_row] is not None:
-            new_row += offset
+    if not session.allow_coop:
+        for _ in WorldUserAssociation.select().where(WorldUserAssociation.world == world.id):
+            raise InvalidAction("World is already claimed")
 
-        if new_row < 0 or new_row >= session.num_rows:
-            raise InvalidAction("No empty slots found in this direction")
+    WorldUserAssociation.create(
+        world=world,
+        user=user_id,
+    )
 
-        with database.db.atomic():
-            logger().info(f"{describe_session(session)}, User {user_id}. "
-                          f"Performing {action}, new row is {new_row}, from {membership.row}.")
-            membership.row = new_row
-            membership.inventory = None
-            membership.save()
 
-    elif action == SessionAdminUserAction.ASSOCIATE:
-        if membership.is_observer:
-            membership.row = _find_empty_row(session)
-        else:
-            membership.row = None
-            membership.inventory = None
-        logger().info(f"{describe_session(session)}, User {user_id}. Performing {action}, "
-                      f"new row is {membership.row}.")
-        membership.save()
+def _unclaim_world(sio: ServerApp, session: MultiplayerSession, user_id: int, world_uid: uuid.UUID):
+    if not session.allow_everyone_claim_world:
+        verify_has_admin(sio, session.id, None)
+
+    WorldUserAssociation.get_by_ids(
+        world_uid, user_id
+    ).delete_instance()
+
+
+def _switch_admin(sio: ServerApp, session: MultiplayerSession, membership: MultiplayerMembership):
+    session_id = session.id
+
+    # Must be admin for this
+    verify_has_admin(sio, session_id, None, allow_when_no_admins=True)
+    num_admins = MultiplayerMembership.select().where(MultiplayerMembership.session == session_id,
+                                                      is_boolean(MultiplayerMembership.admin, True)).count()
+
+    if membership.admin and num_admins <= 1:
+        raise InvalidAction("can't demote the only admin")
+
+    membership.admin = not membership.admin
+    add_audit_entry(sio, session, f"Made {membership.effective_name} {'' if membership.admin else 'not '}an admin")
+    logger().info(f"{describe_session(session)}, User {membership.user.id}. Performing admin switch, "
+                  f"new status is {membership.admin}.")
+    membership.save()
+
+
+def _create_patcher_file(sio: ServerApp, session: MultiplayerSession, world_uid: uuid.UUID, cosmetic_json: dict):
+    player_names = {}
+    uuids = {}
+    player_index = None
+
+    for world in session_common.get_ordered_worlds(session):
+        player_names[world.order] = world.name
+        uuids[world.order] = world.uuid
+        if world.uuid == world_uid:
+            player_index = world.order
+
+    if player_index is None:
+        raise InvalidAction("Unknown world uid for exporting")
+
+    layout_description = session.layout_description
+    players_config = PlayersConfiguration(
+        player_index=player_index,
+        player_names=player_names,
+        uuids=uuids,
+    )
+    preset = layout_description.get_preset(players_config.player_index)
+    cosmetic_patches = preset.game.data.layout.cosmetic_patches.from_json(cosmetic_json)
+
+    add_audit_entry(sio, session,
+                    f"Exporting game named {players_config.player_names[players_config.player_index]}")
+
+    data_factory = preset.game.patch_data_factory(layout_description, players_config, cosmetic_patches)
+    try:
+        return data_factory.create_data()
+    except Exception as e:
+        logger().exception("Error when creating patch data")
+        raise InvalidAction(f"Unable to export game: {e}")
+
+
+def admin_player(sio: ServerApp, session_id: int, user_id: int, action: str, arg):
+    verify_has_admin(sio, session_id, user_id)
+    action: SessionAdminUserAction = SessionAdminUserAction(action)
+
+    session: MultiplayerSession = database.MultiplayerSession.get_by_id(session_id)
+    membership = MultiplayerMembership.get_by_ids(user_id, session_id)
+
+    if action == SessionAdminUserAction.KICK:
+        _kick_user(sio, session, membership, user_id)
+
+    elif action == SessionAdminUserAction.CLAIM:
+        _claim_world(sio, session, user_id, arg)
+
+    elif action == SessionAdminUserAction.UNCLAIM:
+        _unclaim_world(sio, session, user_id, arg)
 
     elif action == SessionAdminUserAction.SWITCH_ADMIN:
-        # Must be admin for this
-        _verify_has_admin(sio, session_id, None, allow_when_no_admins=True)
-        num_admins = MultiplayerMembership.select().where(MultiplayerMembership.session == session_id,
-                                                          is_boolean(MultiplayerMembership.admin, True)).count()
-
-        if membership.admin and num_admins <= 1:
-            raise InvalidAction("can't demote the only admin")
-
-        membership.admin = not membership.admin
-        add_audit_entry(sio, session, f"Made {membership.effective_name} {'' if membership.admin else 'not '}an admin")
-        logger().info(f"{describe_session(session)}, User {user_id}. Performing {action}, "
-                      f"new status is {membership.admin}.")
-        membership.save()
+        _switch_admin(sio, session, membership)
 
     elif action == SessionAdminUserAction.CREATE_PATCHER_FILE:
-        player_names = {i: f"Player {i + 1}" for i in range(session.num_rows)}
-        uuids = {}
-
-        for member in MultiplayerMembership.non_observer_members(session):
-            player_names[member.row] = member.effective_name
-            uuids[member.row] = member.effective_name
-
-        layout_description = session.layout_description
-        players_config = PlayersConfiguration(
-            player_index=membership.row,
-            player_names=player_names,
-            uuids=uuids,
-        )
-        preset = layout_description.get_preset(players_config.player_index)
-        cosmetic_patches = preset.game.data.layout.cosmetic_patches.from_json(arg)
-
-        add_audit_entry(sio, session, f"Made an ISO for row {membership.row + 1}")
-
-        data_factory = preset.game.patch_data_factory(layout_description, players_config, cosmetic_patches)
-        try:
-            return data_factory.create_data()
-        except Exception as e:
-            logger().exception("Error when creating patch data")
-            raise InvalidAction(f"Unable to export game: {e}")
+        world_uid, cosmetic_json = arg
+        return _create_patcher_file(sio, session, world_uid, cosmetic_json)
 
     elif action == SessionAdminUserAction.ABANDON:
         # FIXME
@@ -512,113 +478,6 @@ def game_session_admin_player(sio: ServerApp, session_id: int, user_id: int, act
     emit_session_meta_update(session)
 
 
-def _query_for_actions(membership: MultiplayerMembership) -> peewee.ModelSelect:
-    return WorldAction.select().where(
-        WorldAction.provider_row != membership.row,
-        WorldAction.session == membership.session,
-        WorldAction.receiver_row == membership.row,
-    ).order_by(WorldAction.time.asc())
-
-
-def _base64_encode_pickup(pickup: PickupEntry, resource_database: ResourceDatabase) -> str:
-    encoded_pickup = bitpacking.pack_value(BitPackPickupEntry(pickup, resource_database))
-    return base64.b85encode(encoded_pickup).decode("utf-8")
-
-
-def _collect_location(session: MultiplayerSession, membership: MultiplayerMembership,
-                      description: LayoutDescription,
-                      pickup_location: int) -> int | None:
-    """
-    Collects the pickup in the given location. Returns
-    :param session:
-    :param membership:
-    :param description:
-    :param pickup_location:
-    :return: The rewarded player if some player must be updated of the fact.
-    """
-    player_row: int = membership.row
-    pickup_target = _get_pickup_target(description, player_row, pickup_location)
-
-    def log(msg):
-        logger().info(f"{describe_session(session, membership)} found item at {pickup_location}. {msg}")
-
-    if pickup_target is None:
-        log("It's an ETM.")
-        return None
-
-    if pickup_target.player == membership.row:
-        log(f"It's a {pickup_target.pickup.name} for themselves.")
-        return None
-
-    try:
-        WorldAction.create(
-            session=session,
-            provider_row=membership.row,
-            provider_location_index=pickup_location,
-            receiver_row=pickup_target.player,
-        )
-    except peewee.IntegrityError:
-        # Already exists and it's for another player, no inventory update needed
-        log(f"It's a {pickup_target.pickup.name} for {pickup_target.player}, but it was already collected.")
-        return None
-
-    log(f"It's a {pickup_target.pickup.name} for {pickup_target.player}.")
-    return pickup_target.player
-
-
-def _get_resource_database(description: LayoutDescription, player: int) -> ResourceDatabase:
-    return default_database.resource_database_for(description.get_preset(player).game)
-
-
-def _get_pickup_target(description: LayoutDescription, provider: int, location: int) -> PickupTarget | None:
-    pickup_assignment = description.all_patches[provider].pickup_assignment
-    return pickup_assignment.get(PickupIndex(location))
-
-
-def emit_game_session_pickups_update(sio: ServerApp, membership: MultiplayerMembership):
-    session: MultiplayerSession = membership.session
-
-    if session.state == MultiplayerSessionState.SETUP:
-        raise RuntimeError("Unable to emit pickups during SETUP")
-
-    if membership.is_observer:
-        raise RuntimeError("Unable to emit pickups for observers")
-
-    description = session.layout_description
-    worlds: dict[uuid.UUID, World] = {
-        w.uuid: w
-        for w in session.worlds
-    }
-    index_order = [w for w in worlds.keys()]
-
-    resource_database = _get_resource_database(description, membership.row)
-
-    result = []
-    actions: list[WorldAction] = list(_query_for_actions(membership))
-    for action in actions:
-        pickup_target = _get_pickup_target(description, index_order.index(action.provider.uuid),
-                                           action.location)
-
-        if pickup_target is None:
-            logging.error(f"Action {action} has a location index with nothing.")
-            result.append(None)
-        else:
-            result.append({
-                "provider_name": worlds[action.provider].name,
-                "pickup": _base64_encode_pickup(pickup_target.pickup, resource_database),
-            })
-
-    logger().info(f"{describe_session(session, membership)} "
-                  f"notifying {resource_database.game_enum.value} of {len(result)} pickups.")
-
-    data = {
-        "game": resource_database.game_enum.value,
-        "pickups": result,
-    }
-    flask_socketio.emit("game_session_pickups_update", data, room=f"game-session-{session.id}-{membership.user.id}")
-
-
 def setup_app(sio: ServerApp):
-    # sio.on("disconnect_game_session", disconnect_game_session)
-    sio.on("game_session_admin_session", game_session_admin_session)
-    sio.on("game_session_admin_player", game_session_admin_player)
+    sio.on("multiplayer/admin_session", admin_session)
+    sio.on("multiplayer/admin_player", admin_player)

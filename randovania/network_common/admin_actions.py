@@ -11,7 +11,6 @@ class SessionAdminGlobalAction(Enum):
     DOWNLOAD_LAYOUT_DESCRIPTION = "download_layout_description"
     START_SESSION = "start_session"
     FINISH_SESSION = "finish_session"
-    RESET_SESSION = "reset_session"
     CHANGE_PASSWORD = "change_password"
     CHANGE_TITLE = "change_title"
     DUPLICATE_SESSION = "duplicate_session"

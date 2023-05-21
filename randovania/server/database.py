@@ -62,12 +62,13 @@ class EnumField(peewee.CharField):
 
 
 class User(BaseModel):
-    discord_id = peewee.IntegerField(index=True, null=True)
-    name = peewee.CharField()
-    admin = peewee.BooleanField(default=False)
+    id: int
+    discord_id: int | None = peewee.IntegerField(index=True, null=True)
+    name: str = peewee.CharField()
+    admin: bool = peewee.BooleanField(default=False)
 
     @classmethod
-    def get_by_id(cls, pk) -> "User":
+    def get_by_id(cls, pk) -> Self:
         return cls.get(cls._meta.primary_key == pk)
 
     @property
@@ -110,6 +111,9 @@ class MultiplayerSession(BaseModel):
     creation_date = peewee.DateTimeField(default=_datetime_now)
     generation_in_progress: User | None = peewee.ForeignKeyField(User, null=True)
     dev_features: str | None = peewee.CharField(null=True)
+
+    allow_coop: bool = peewee.BooleanField(default=False)
+    allow_everyone_claim_world: bool = peewee.BooleanField(default=False)
 
     members: list[MultiplayerMembership]
     worlds: list[World]
@@ -256,6 +260,13 @@ class World(BaseModel):
     def get_by_uuid(cls, uid) -> World:
         return cls.get(World.uuid == uid)
 
+    @classmethod
+    def get_by_order(cls, session_id: int, order: int) -> World:
+        return cls.get(
+            World.session == session_id,
+            World.order == order,
+        )
+
 
 class WorldUserAssociation(BaseModel):
     """A given user's association to one given row."""
@@ -277,10 +288,12 @@ class WorldUserAssociation(BaseModel):
 
 
 class MultiplayerMembership(BaseModel):
-    user = peewee.ForeignKeyField(User, backref="sessions")
-    session = peewee.ForeignKeyField(MultiplayerSession, backref="members")
+    user: User = peewee.ForeignKeyField(User, backref="sessions")
+    session: MultiplayerSession = peewee.ForeignKeyField(MultiplayerSession, backref="members")
     admin: bool = peewee.BooleanField()
     join_date = peewee.DateTimeField(default=_datetime_now)
+
+    can_help_layout_generation: bool = peewee.BooleanField(default=False)
 
     @property
     def effective_name(self) -> str:

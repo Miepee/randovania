@@ -7,6 +7,8 @@ from unittest.mock import MagicMock, PropertyMock, patch, call
 import peewee
 import pytest
 
+import randovania.server.multiplayer.session_admin
+import randovania.server.multiplayer.session_api
 import randovania.server.multiplayer.session_common
 from randovania.game_description.assignment import PickupTarget
 from randovania.game_description.resources.pickup_entry import PickupEntry, PickupModel
@@ -22,7 +24,7 @@ from randovania.network_common.binary_formats import BinaryMultiplayerSessionEnt
     BinaryGameSessionAuditLog
 from randovania.network_common.error import InvalidAction
 from randovania.network_common.session_state import MultiplayerSessionState
-from randovania.server import multiplayer_session, database
+from randovania.server import database
 
 
 @pytest.fixture(name="mock_emit_session_update")
@@ -252,7 +254,7 @@ def test_game_session_collect_pickup_for_self(mock_session_description: Property
 
     # Run
     with flask_app.test_request_context():
-        result = game_session.game_session_collect_locations(sio, 1, (0,))
+        result = game_session.collect_locations(sio, 1, (0,))
 
     # Assert
     assert result is None
@@ -277,7 +279,7 @@ def test_game_session_collect_pickup_etm(mock_session_description: PropertyMock,
 
     # Run
     with flask_app.test_request_context():
-        result = game_session.game_session_collect_locations(sio, 1, (0,))
+        result = game_session.collect_locations(sio, 1, (0,))
 
     # Assert
     assert result is None
@@ -316,7 +318,7 @@ def test_game_session_collect_pickup_other(flask_app, two_player_session, echoes
 
     # Run
     with flask_app.test_request_context():
-        result = game_session.game_session_collect_locations(sio, 1, locations_to_collect)
+        result = game_session.collect_locations(sio, 1, locations_to_collect)
 
     # Assert
     assert result is None
@@ -346,7 +348,7 @@ def test_game_session_admin_player_switch_is_observer(clean_database, flask_app,
 
     # Run
     with flask_app.test_request_context():
-        game_session.game_session_admin_player(sio, 1, 1234, SessionAdminUserAction.ASSOCIATE.value, None)
+        randovania.server.multiplayer.session_admin.admin_player(sio, 1, 1234, SessionAdminUserAction.ASSOCIATE.value, None)
 
     # Assert
     membership = database.MultiplayerMembership.get(user=user1, session=session)
@@ -374,7 +376,7 @@ def test_game_session_admin_player_include_in_session(clean_database, flask_app,
 
     # Run
     with flask_app.test_request_context():
-        game_session.game_session_admin_player(sio, 1, 4234, SessionAdminUserAction.ASSOCIATE.value, None)
+        randovania.server.multiplayer.session_admin.admin_player(sio, 1, 4234, SessionAdminUserAction.ASSOCIATE.value, None)
 
     # Assert
     membership = database.MultiplayerMembership.get(user=users[3], session=session)
@@ -396,7 +398,7 @@ def test_game_session_admin_kick_last(clean_database, flask_app, mocker, mock_au
 
     # Run
     with flask_app.test_request_context():
-        game_session.game_session_admin_player(sio, 1, 1234, SessionAdminUserAction.KICK.value, None)
+        randovania.server.multiplayer.session_admin.admin_player(sio, 1, 1234, SessionAdminUserAction.KICK.value, None)
 
     # Assert
     for table in [database.MultiplayerSession, database.World,
@@ -428,7 +430,7 @@ def test_game_session_admin_player_move(clean_database, flask_app, mock_emit_ses
 
     # Run
     with flask_app.test_request_context():
-        game_session.game_session_admin_player(sio, 1, 1234, "move", offset)
+        randovania.server.multiplayer.session_admin.admin_player(sio, 1, 1234, "move", offset)
 
     # Assert
     membership = database.MultiplayerMembership.get(user=user1, session=session)
@@ -458,7 +460,7 @@ def test_game_session_admin_player_patcher_file(mock_layout_description: Propert
 
     # Run
     with flask_app.test_request_context():
-        result = game_session.game_session_admin_player(sio, 1, 1234, "create_patcher_file", cosmetic.as_json)
+        result = randovania.server.multiplayer.session_admin.admin_player(sio, 1, 1234, "create_patcher_file", cosmetic.as_json)
 
     # Assert
     mock_layout_description.return_value.get_preset.assert_called_once_with(2)
@@ -484,7 +486,7 @@ def test_game_session_admin_session_delete_session(mock_emit_session_update: Mag
 
     # Run
     with flask_app.test_request_context():
-        game_session.game_session_admin_session(sio, 1, SessionAdminGlobalAction.DELETE_SESSION.value, None)
+        randovania.server.multiplayer.session_admin.admin_session(sio, 1, SessionAdminGlobalAction.DELETE_SESSION.value, None)
 
     # Assert
     mock_emit_session_update.assert_called_once_with(session)
@@ -501,7 +503,7 @@ def test_game_session_admin_session_create_row(mock_emit_session_update: MagicMo
 
     # Run
     with flask_app.test_request_context():
-        game_session.game_session_admin_session(sio, 1, "create_row", preset_manager.default_preset.as_json)
+        randovania.server.multiplayer.session_admin.admin_session(sio, 1, "create_row", preset_manager.default_preset.as_json)
 
     # Assert
     mock_emit_session_update.assert_called_once_with(session)
@@ -523,8 +525,8 @@ def test_game_session_admin_session_change_row(mock_emit_session_update: MagicMo
 
     # Run
     with flask_app.test_request_context():
-        game_session.game_session_admin_session(sio, 1, SessionAdminGlobalAction.CHANGE_WORLD.value,
-                                                (1, preset_manager.default_preset.as_json))
+        randovania.server.multiplayer.session_admin.admin_session(sio, 1, SessionAdminGlobalAction.CHANGE_WORLD.value,
+                                                                  (1, preset_manager.default_preset.as_json))
 
     # Assert
     mock_emit_session_update.assert_called_once_with(session)
@@ -545,7 +547,7 @@ def test_game_session_admin_session_delete_row(mock_emit_session_update: MagicMo
 
     # Run
     with flask_app.test_request_context():
-        game_session.game_session_admin_session(sio, 1, SessionAdminGlobalAction.DELETE_WORLD.value, 1)
+        randovania.server.multiplayer.session_admin.admin_session(sio, 1, SessionAdminGlobalAction.DELETE_WORLD.value, 1)
 
     # Assert
     mock_emit_session_update.assert_called_once_with(session)
@@ -572,7 +574,7 @@ def test_game_session_admin_session_delete_row_invalid(mock_emit_session_update,
 
     # Run
     with pytest.raises(InvalidAction) as e, flask_app.test_request_context():
-        game_session.game_session_admin_session(sio, 1, SessionAdminGlobalAction.DELETE_WORLD.value, 0)
+        randovania.server.multiplayer.session_admin.admin_session(sio, 1, SessionAdminGlobalAction.DELETE_WORLD.value, 0)
 
     # Assert
     assert e.value.message == expected_message
@@ -603,8 +605,8 @@ def test_game_session_admin_session_update_layout_generation(mock_emit_session_u
 
     # Run
     with expectation, flask_app.test_request_context():
-        game_session.game_session_admin_session(sio, 1, SessionAdminGlobalAction.UPDATE_LAYOUT_GENERATION.value,
-                                                case != "to_false")
+        randovania.server.multiplayer.session_admin.admin_session(sio, 1, SessionAdminGlobalAction.UPDATE_LAYOUT_GENERATION.value,
+                                                                  case != "to_false")
 
     # Assert
     if case == "to_true_busy":
@@ -645,7 +647,7 @@ def test_game_session_admin_session_change_layout_description(clean_database, pr
 
     # Run
     with flask_app.test_request_context():
-        game_session.game_session_admin_session(sio, 1, SessionAdminGlobalAction.CHANGE_LAYOUT_DESCRIPTION.value,
+        randovania.server.multiplayer.session_admin.admin_session(sio, 1, SessionAdminGlobalAction.CHANGE_LAYOUT_DESCRIPTION.value,
                                                 "layout_description_json")
 
     # Assert
@@ -672,8 +674,8 @@ def test_game_session_admin_session_remove_layout_description(mock_emit_session_
 
     # Run
     with flask_app.test_request_context():
-        game_session.game_session_admin_session(sio, 1, SessionAdminGlobalAction.CHANGE_LAYOUT_DESCRIPTION.value,
-                                                None)
+        randovania.server.multiplayer.session_admin.admin_session(sio, 1, SessionAdminGlobalAction.CHANGE_LAYOUT_DESCRIPTION.value,
+                                                                  None)
 
     # Assert
     mock_emit_session_update.assert_called_once_with(session)
@@ -700,7 +702,7 @@ def test_game_session_admin_session_change_layout_description_invalid(mock_emit_
 
     # Run
     with pytest.raises(InvalidAction, match=expected_message), flask_app.test_request_context():
-        game_session.game_session_admin_session(sio, 1, SessionAdminGlobalAction.CHANGE_LAYOUT_DESCRIPTION.value,
+        randovania.server.multiplayer.session_admin.admin_session(sio, 1, SessionAdminGlobalAction.CHANGE_LAYOUT_DESCRIPTION.value,
                                                 "layout_description_json")
 
     # Assert
@@ -720,9 +722,9 @@ def test_game_session_admin_session_download_layout_description(mock_layout_desc
 
     # Run
     with flask_app.test_request_context():
-        result = game_session.game_session_admin_session(sio, 1,
-                                                         SessionAdminGlobalAction.DOWNLOAD_LAYOUT_DESCRIPTION.value,
-                                                         None)
+        result = randovania.server.multiplayer.session_admin.admin_session(sio, 1,
+                                                                           SessionAdminGlobalAction.DOWNLOAD_LAYOUT_DESCRIPTION.value,
+                                                                           None)
 
     # Assert
     mock_emit_session_update.assert_not_called()
@@ -745,8 +747,8 @@ def test_game_session_admin_session_download_layout_description_no_spoiler(mock_
 
     # Run
     with pytest.raises(InvalidAction), flask_app.test_request_context():
-        game_session.game_session_admin_session(sio, 1, SessionAdminGlobalAction.DOWNLOAD_LAYOUT_DESCRIPTION.value,
-                                                None)
+        randovania.server.multiplayer.session_admin.admin_session(sio, 1, SessionAdminGlobalAction.DOWNLOAD_LAYOUT_DESCRIPTION.value,
+                                                                  None)
 
     # Assert
     mock_emit_session_update.assert_not_called()
@@ -768,7 +770,7 @@ def test_game_session_admin_session_start_session(mock_session_description: Prop
 
     # Run
     with flask_app.test_request_context():
-        game_session.game_session_admin_session(sio, 1, SessionAdminGlobalAction.START_SESSION.value, None)
+        randovania.server.multiplayer.session_admin.admin_session(sio, 1, SessionAdminGlobalAction.START_SESSION.value, None)
 
     # Assert
     mock_emit_session_update.assert_called_once_with(session)
@@ -792,7 +794,7 @@ def test_game_session_admin_session_finish_session(clean_database, mock_emit_ses
 
     # Run
     with expectation, flask_app.test_request_context():
-        game_session.game_session_admin_session(sio, 1, SessionAdminGlobalAction.FINISH_SESSION.value, None)
+        randovania.server.multiplayer.session_admin.admin_session(sio, 1, SessionAdminGlobalAction.FINISH_SESSION.value, None)
 
     # Assert
     if starting_state != MultiplayerSessionState.IN_PROGRESS:
@@ -814,7 +816,7 @@ def test_game_session_admin_session_reset_session(clean_database, flask_app):
 
     # Run
     with pytest.raises(InvalidAction), flask_app.test_request_context():
-        game_session.game_session_admin_session(sio, 1, SessionAdminGlobalAction.RESET_SESSION.value, None)
+        randovania.server.multiplayer.session_admin.admin_session(sio, 1, SessionAdminGlobalAction.RESET_SESSION.value, None)
 
 
 def test_game_session_admin_session_change_password(clean_database, mock_emit_session_update, flask_app, mock_audit):
@@ -827,7 +829,7 @@ def test_game_session_admin_session_change_password(clean_database, mock_emit_se
 
     # Run
     with flask_app.test_request_context():
-        game_session.game_session_admin_session(sio, 1, SessionAdminGlobalAction.CHANGE_PASSWORD.value, "the_password")
+        randovania.server.multiplayer.session_admin.admin_session(sio, 1, SessionAdminGlobalAction.CHANGE_PASSWORD.value, "the_password")
 
     # Assert
     mock_emit_session_update.assert_called_once_with(session)
@@ -844,7 +846,7 @@ def test_game_session_admin_session_change_title(clean_database, mock_emit_sessi
 
     # Run
     with flask_app.test_request_context():
-        game_session.game_session_admin_session(sio, 1, SessionAdminGlobalAction.CHANGE_TITLE.value, "new_name")
+        randovania.server.multiplayer.session_admin.admin_session(sio, 1, SessionAdminGlobalAction.CHANGE_TITLE.value, "new_name")
 
     # Assert
     mock_emit_session_update.assert_called_once_with(session)
@@ -865,7 +867,7 @@ def test_game_session_admin_session_duplicate_session(clean_database, mock_emit_
 
     # Run
     with flask_app.test_request_context():
-        game_session.game_session_admin_session(sio, 1, SessionAdminGlobalAction.DUPLICATE_SESSION.value, "new_name")
+        randovania.server.multiplayer.session_admin.admin_session(sio, 1, SessionAdminGlobalAction.DUPLICATE_SESSION.value, "new_name")
 
     # Assert
     mock_emit_session_update.assert_not_called()
@@ -889,7 +891,7 @@ def test_game_session_admin_session_download_permalink(clean_database, mock_emit
 
     # Run
     with flask_app.test_request_context():
-        result = game_session.game_session_admin_session(sio, 1, SessionAdminGlobalAction.REQUEST_PERMALINK.value, None)
+        result = randovania.server.multiplayer.session_admin.admin_session(sio, 1, SessionAdminGlobalAction.REQUEST_PERMALINK.value, None)
 
     # Assert
     mock_emit_session_update.assert_not_called()
@@ -899,7 +901,7 @@ def test_game_session_admin_session_download_permalink(clean_database, mock_emit
 
 def test_change_row_missing_arguments(flask_app):
     with pytest.raises(InvalidAction), flask_app.test_request_context():
-        game_session._change_world(MagicMock(), MagicMock(), (5,))
+        randovania.server.multiplayer.session_admin._change_world(MagicMock(), MagicMock(), (5,))
 
 
 def test_verify_in_setup(clean_database, flask_app):
@@ -908,7 +910,7 @@ def test_verify_in_setup(clean_database, flask_app):
                                                  layout_description_json="{}")
 
     with pytest.raises(InvalidAction), flask_app.test_request_context():
-        game_session._verify_in_setup(session)
+        randovania.server.multiplayer.session_admin._verify_in_setup(session)
 
 
 def test_verify_no_layout_description(clean_database, flask_app):
@@ -917,7 +919,7 @@ def test_verify_no_layout_description(clean_database, flask_app):
                                                  layout_description_json="{}")
 
     with pytest.raises(InvalidAction), flask_app.test_request_context():
-        game_session._verify_in_setup(session)
+        randovania.server.multiplayer.session_admin._verify_in_setup(session)
 
 
 @pytest.fixture(name="session_update")
