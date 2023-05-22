@@ -159,8 +159,8 @@ async def show_game_session(app: QtWidgets.QApplication, options, session_id: in
         app.quit()
         return
 
-    await network_client.join_game_session(sessions[0], None)
-    preset_for = preset_manager.default_preset_for_game
+    new_session = await network_client.join_game_session(sessions[0], None)
+    # preset_for = preset_manager.default_preset_for_game
 
     # games = [uuid.uuid4(), uuid.uuid4(), uuid.uuid4(), uuid.uuid4()]
     # GameSessionEntry(
@@ -191,7 +191,7 @@ async def show_game_session(app: QtWidgets.QApplication, options, session_id: in
 
     app.game_session_window = await MultiplayerSessionWindow.create_and_update(
         network_client,
-        app.game_connection,
+        new_session,
         preset_manager,
         None,
         options

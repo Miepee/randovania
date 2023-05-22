@@ -6,9 +6,13 @@ from randovania.server.server_app import ServerApp
 
 
 def list_sessions(sio: ServerApp, limit: int | None):
+    sessions: list[MultiplayerSession] = list(
+        MultiplayerSession.select().order_by(MultiplayerSession.id.desc()).limit(limit)
+    )
+
     return [
-        session.create_list_entry()
-        for session in MultiplayerSession.select().order_by(MultiplayerSession.id.desc()).limit(limit)
+        session.create_list_entry().as_json
+        for session in sessions
     ]
 
 
@@ -67,12 +71,10 @@ def request_session_update(sio: ServerApp, session_id: int):
 
 
 def setup_app(sio: ServerApp):
-    sio.on("multiplayer/list_sessions", list_sessions, with_header_check=True)
-    sio.on("multiplayer/create_session", create_game_session, with_header_check=True)
-    sio.on("multiplayer/join_session", join_session, with_header_check=True)
-    sio.on("multiplayer/listen_to_events", listen_to_events)
-    sio.on("multiplayer/request_session_update", request_session_update)
-    # sio.on("game_session_admin_session", game_session_admin_session)
-    # sio.on("game_session_admin_player", game_session_admin_player)
+    sio.on("multiplayer_list_sessions", list_sessions, with_header_check=True)
+    sio.on("multiplayer_create_session", create_game_session, with_header_check=True)
+    sio.on("multiplayer_join_session", join_session, with_header_check=True)
+    sio.on("multiplayer_listen_to_events", listen_to_events)
+    sio.on("multiplayer_request_session_update", request_session_update)
 
 

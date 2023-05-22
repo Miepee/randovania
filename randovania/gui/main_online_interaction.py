@@ -4,12 +4,12 @@ from PySide6 import QtWidgets
 from qasync import asyncSlot
 
 from randovania.gui.dialog.login_prompt_dialog import LoginPromptDialog
-from randovania.gui.multiplayer_session_window import MultiplayerSessionWindow
+from randovania.gui.dialog.online_game_list_dialog import OnlineGameListDialog
 from randovania.gui.generated.main_window_ui import Ui_MainWindow
 from randovania.gui.lib import common_qt_lib, async_dialog, wait_dialog
 from randovania.gui.lib.qt_network_client import handle_network_errors, QtNetworkClient
 from randovania.gui.lib.window_manager import WindowManager
-from randovania.gui.dialog.online_game_list_dialog import OnlineGameListDialog
+from randovania.gui.multiplayer_session_window import MultiplayerSessionWindow
 from randovania.interface_common.options import Options
 from randovania.interface_common.preset_manager import PresetManager
 from randovania.network_client.network_client import ConnectionState
@@ -102,8 +102,8 @@ class OnlineInteractions(QtWidgets.QWidget):
 
         if await async_dialog.execute_dialog(browser) == QtWidgets.QDialog.DialogCode.Accepted:
             self.game_session_window = await MultiplayerSessionWindow.create_and_update(
-                network_client, common_qt_lib.get_game_connection(),
-                self.preset_manager, self.window_manager, self.options,
+                network_client, browser.joined_session,
+                self.window_manager, self.options,
             )
             if self.game_session_window is not None:
                 self.game_session_window.show()
@@ -136,11 +136,12 @@ class OnlineInteractions(QtWidgets.QWidget):
         if await async_dialog.execute_dialog(dialog) != QtWidgets.QDialog.DialogCode.Accepted:
             return
 
-        await self.network_client.create_new_session(dialog.textValue())
-        self.game_session_window = await MultiplayerSessionWindow.create_and_update(self.network_client,
-                                                                                    common_qt_lib.get_game_connection(),
-                                                                                    self.preset_manager,
-                                                                                    self.window_manager,
-                                                                                    self.options)
+        new_session = await self.network_client.create_new_session(dialog.textValue())
+        self.game_session_window = await MultiplayerSessionWindow.create_and_update(
+            self.network_client,
+            new_session,
+            self.window_manager,
+            self.options,
+        )
         if self.game_session_window is not None:
             self.game_session_window.show()

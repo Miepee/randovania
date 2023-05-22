@@ -7,7 +7,7 @@ from qasync import asyncSlot
 from randovania.gui.generated.multiplayer_session_browser_dialog_ui import Ui_MultiplayerSessionBrowserDialog
 from randovania.gui.lib import common_qt_lib, async_dialog
 from randovania.gui.lib.qt_network_client import handle_network_errors, QtNetworkClient
-from randovania.network_client.multiplayer_session import MultiplayerSessionListEntry
+from randovania.network_client.multiplayer_session import MultiplayerSessionListEntry, MultiplayerSessionEntry
 from randovania.network_client.network_client import ConnectionState
 from randovania.network_common.error import WrongPassword
 from randovania.network_common.session_state import MultiplayerSessionState
@@ -16,6 +16,7 @@ from randovania.network_common.session_state import MultiplayerSessionState
 class OnlineGameListDialog(QDialog, Ui_MultiplayerSessionBrowserDialog):
     sessions: list[MultiplayerSessionListEntry]
     visible_sessions: list[MultiplayerSessionListEntry]
+    joined_session: MultiplayerSessionEntry | None = None
 
     def __init__(self, network_client: QtNetworkClient):
         super().__init__()
@@ -101,7 +102,7 @@ class OnlineGameListDialog(QDialog, Ui_MultiplayerSessionBrowserDialog):
             password = None
 
         try:
-            await self.network_client.join_game_session(session, password)
+            self.joined_session = await self.network_client.join_game_session(session, password)
             return self.accept()
 
         except WrongPassword:

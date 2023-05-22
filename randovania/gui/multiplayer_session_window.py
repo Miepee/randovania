@@ -77,14 +77,13 @@ class MultiplayerSessionWindow(QtWidgets.QMainWindow, Ui_MultiplayerSessionWindo
     _already_kicked = False
     _can_stop_background_process = True
 
-    def __init__(self, network_client: QtNetworkClient, game_connection: GameConnection,
-                 window_manager: WindowManager, options: Options):
+    def __init__(self, game_session_api: MultiplayerSessionApi, window_manager: WindowManager, options: Options):
         super().__init__()
         self.setupUi(self)
         common_qt_lib.set_default_window_icon(self)
 
-        self.network_client = network_client
-        self.game_connection = game_connection
+        self.game_session_api = game_session_api
+        self.network_client = game_session_api.network_client
         self.failure_handler = GenerationFailureHandler(self)
 
         self._preset_manager = window_manager.preset_manager
@@ -93,8 +92,12 @@ class MultiplayerSessionWindow(QtWidgets.QMainWindow, Ui_MultiplayerSessionWindo
         self._trackers = load_trackers_configuration()
         self._update_status_lock = asyncio.Lock()
 
-        game_session_api = MultiplayerSessionApi(self, network_client)
+        game_session_api.widget_root = self
+        game_session_api.setParent(self)
         self.game_session_users_widget = MultiplayerSessionUsersWidget(options, self._preset_manager, game_session_api)
+        self.tabWidget.removeTab(0)
+        self.tabWidget.insertTab(0, self.game_session_users_widget, "Players")
+        self.tabWidget.setCurrentIndex(0)
 
         # Advanced Options
         self.advanced_options_menu = QtWidgets.QMenu(self.advanced_options_tool)
@@ -172,18 +175,19 @@ class MultiplayerSessionWindow(QtWidgets.QMainWindow, Ui_MultiplayerSessionWindo
         self.network_client.GameSessionAuditLogUpdated.connect(self.on_game_session_audit_log_update)
         self.network_client.GameSessionInventoryUpdated.connect(self.on_game_session_inventory_update)
         self.network_client.ConnectionStateUpdated.connect(self.on_server_connection_state_updated)
-        self.game_connection.GameStateUpdated.connect(self.on_game_state_updated)
 
     @classmethod
-    async def create_and_update(cls, network_client: QtNetworkClient, game_connection: GameConnection,
+    async def create_and_update(cls, network_client: QtNetworkClient, session_entry: MultiplayerSessionEntry,
                                 window_manager: WindowManager, options: Options,
                                 ) -> Self:
 
         logger.debug("Creating GameSessionWindow")
-        window = cls(network_client, game_connection, window_manager, options)
-        await window.on_game_session_meta_update(network_client.current_game_session_meta)
-        window.update_session_actions(MultiplayerWorldActions(tuple()))
-        window.update_session_audit_log(MultiplayerSessionAuditLog(tuple()))
+
+        game_session_api = MultiplayerSessionApi(network_client, session_entry)
+        window = cls(game_session_api, window_manager, options)
+        await window.on_game_session_meta_update(session_entry)
+        # window.update_session_actions(MultiplayerWorldActions(tuple()))
+        # window.update_session_audit_log(MultiplayerSessionAuditLog(tuple()))
         window.on_server_connection_state_updated(network_client.connection_state)
         window.connect_to_events()
         # await window.on_game_state_updated()
@@ -205,10 +209,6 @@ class MultiplayerSessionWindow(QtWidgets.QMainWindow, Ui_MultiplayerSessionWindo
             logging.exception(f"Unable to disconnect: {e}")
         try:
             self.network_client.ConnectionStateUpdated.disconnect(self.on_server_connection_state_updated)
-        except Exception as e:
-            logging.exception(f"Unable to disconnect: {e}")
-        try:
-            self.game_connection.GameStateUpdated.disconnect(self.on_game_state_updated)
         except Exception as e:
             logging.exception(f"Unable to disconnect: {e}")
 
@@ -717,28 +717,6 @@ class MultiplayerSessionWindow(QtWidgets.QMainWindow, Ui_MultiplayerSessionWindo
             await async_dialog.execute_dialog(LoginPromptDialog(self.network_client))
         else:
             await self.network_client.connect_to_server()
-
-    @asyncSlot(ConnectedGameState)
-    async def on_game_state_updated(self, state: ConnectedGameState):
-        try:
-            async with self._update_status_lock:
-                await self.network_client.session_self_update(
-                    state.source.game_enum,
-                    state.current_inventory,
-                    state.status,
-                    self.game_connection.get_backend_choice_for_state(state)
-                )
-        except UnableToConnect:
-            logger.info("Unable to connect to server to update status")
-            await asyncio.sleep(1)
-
-        except KeyError:
-            logger.warning("Unable to find backend choice for state")
-            await asyncio.sleep(1)
-
-        except error.BaseNetworkError as e:
-            logger.warning(f"Received a {e} when updating status for server")
-            await asyncio.sleep(1)
 
     def _on_close_item_tracker(self, row_id: int):
         self.removeDockWidget(self.tracker_docks.pop(row_id))

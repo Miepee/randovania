@@ -479,5 +479,5 @@ def admin_player(sio: ServerApp, session_id: int, user_id: int, action: str, arg
 
 
 def setup_app(sio: ServerApp):
-    sio.on("multiplayer/admin_session", admin_session)
-    sio.on("multiplayer/admin_player", admin_player)
+    sio.on("multiplayer_admin_session", admin_session)
+    sio.on("multiplayer_admin_player", admin_player)

@@ -81,15 +81,22 @@ class MultiplayerSessionEntry(JsonDataclass):
     id: int
     name: str
     worlds: list[MultiplayerWorld]
-    users: list[MultiplayerUser]
+    users_list: list[MultiplayerUser]
     game_details: GameDetails | None
     state: MultiplayerSessionState
     generation_in_progress: int | None
     allowed_games: list[RandovaniaGame]
 
     @property
+    def users(self):
+        return {
+            user.id: user
+            for user in self.users_list
+        }
+
+    @property
     def num_admins(self) -> int:
-        return sum(1 for player in self.users if player.admin)
+        return sum(1 for player in self.users.values() if player.admin)
 
     def get_world(self, world_id: uuid.UUID) -> MultiplayerWorld:
         for world in self.worlds:

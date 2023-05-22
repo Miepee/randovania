@@ -224,6 +224,6 @@ def report_disconnect(sio: ServerApp, session_dict: dict, log: logging.Logger):
 
 
 def setup_app(sio: ServerApp):
-    sio.on("multiplayer/collect_locations", collect_locations)
-    sio.on("multiplayer/update_association", update_association)
-    sio.on("multiplayer/watch_inventory", watch_inventory)
+    sio.on("multiplayer_collect_locations", collect_locations)
+    sio.on("multiplayer_update_association", update_association)
+    sio.on("multiplayer_watch_inventory", watch_inventory)

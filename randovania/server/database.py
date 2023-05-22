@@ -17,7 +17,7 @@ from randovania.layout.layout_description import LayoutDescription
 from randovania.layout.preset import Preset
 from randovania.layout.versioned_preset import VersionedPreset
 from randovania.network_client.multiplayer_session import MultiplayerSessionEntry, MultiplayerUser, GameDetails, \
-    MultiplayerWorld
+    MultiplayerWorld, MultiplayerSessionListEntry
 from randovania.network_common.binary_formats import BinaryGameSessionActions, \
     BinaryGameSessionAuditLog
 from randovania.network_common.session_state import MultiplayerSessionState
@@ -151,15 +151,15 @@ class MultiplayerSession(BaseModel):
         return datetime.datetime.fromisoformat(self.creation_date)
 
     def create_list_entry(self):
-        return {
-            "id": self.id,
-            "name": self.name,
-            "has_password": self.password is not None,
-            "state": self.state.value,
-            "num_players": len(self.players),
-            "creator": self.creator.name,
-            "creation_date": self.creation_datetime.astimezone(datetime.timezone.utc).isoformat(),
-        }
+        return MultiplayerSessionListEntry(
+            id=self.id,
+            name=self.name,
+            has_password=self.password is not None,
+            state=self.state,
+            num_players=len(self.members),
+            creator=self.creator.name,
+            creation_date=self.creation_datetime,
+        )
 
     @property
     def allowed_games(self) -> list[RandovaniaGame]:
@@ -213,7 +213,7 @@ class MultiplayerSession(BaseModel):
             id=self.id,
             name=self.name,
             state=self.state,
-            users=[
+            users_list=[
                 MultiplayerUser(
                     id=member.user.id,
                     name=member.user.name,

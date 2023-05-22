@@ -29,7 +29,7 @@ def handle_network_errors(fn: typing.Callable[typing.Concatenate[MultiplayerSess
                           ) -> typing.Callable[Param, RetType]:
     @functools.wraps(fn)
     async def wrapper(self: MultiplayerSessionApi, *args, **kwargs):
-        parent = self.parent
+        parent = self.widget_root
         try:
             return await fn(self, *args, **kwargs)
 
@@ -83,10 +83,11 @@ class MultiplayerSessionApi(QtCore.QObject):
     InventoryUpdated = QtCore.Signal(WorldUserInventory)
 
     current_entry: MultiplayerSessionEntry
+    widget_root: QtWidgets.QWidget | None
 
-    def __init__(self, parent: QtWidgets.QWidget, network_client: QtNetworkClient, entry: MultiplayerSessionEntry):
-        super().__init__(parent)
-        self.parent = parent
+    def __init__(self, network_client: QtNetworkClient, entry: MultiplayerSessionEntry):
+        super().__init__()
+        self.widget_root = None
         self.network_client = network_client
         self.current_entry = entry
 
@@ -128,7 +129,7 @@ class MultiplayerSessionApi(QtCore.QObject):
         print(f"Will delete {preset_id}")
 
     @handle_network_errors
-    def create_new_preset(self, name: str, preset: VersionedPreset, owner: int | None):
+    async def create_new_preset(self, name: str, preset: VersionedPreset, owner: int | None):
         print(f"Create game named {name}")
 
         # new_preset_id = uuid.uuid4()
@@ -139,5 +140,5 @@ class MultiplayerSessionApi(QtCore.QObject):
         # ))
         # you.games[new_preset_id] = "Disconnected"
 
-    def create_patcher_file(self, preset_id, as_json):
+    async def create_patcher_file(self, preset_id, as_json):
         pass

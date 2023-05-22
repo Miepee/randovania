@@ -178,7 +178,7 @@ class MultiplayerSessionUsersWidget(QtWidgets.QTreeWidget):
         if preset is None:
             return
 
-        user = [player for player in self._game_session.users if player.id == user_id][0]
+        user = self._game_session.users[user_id]
         if not user.worlds:
             new_name = user.name
         else:
@@ -204,10 +204,7 @@ class MultiplayerSessionUsersWidget(QtWidgets.QTreeWidget):
             )
 
     def is_admin(self) -> bool:
-        return any(
-            player.admin and player.id == self.your_id
-            for player in self._game_session.users
-        )
+        return self._game_session.users[self.your_id].admin
 
     def update_state(self, game_session: MultiplayerSessionEntry):
         self.clear()
@@ -283,7 +280,7 @@ class MultiplayerSessionUsersWidget(QtWidgets.QTreeWidget):
 
             self.setItemWidget(game_item, 3, game_tool)
 
-        for player in game_session.users:
+        for player in game_session.users.values():
             item = QtWidgets.QTreeWidgetItem(self)
             item.setExpanded(True)
             item.setText(0, player.name)

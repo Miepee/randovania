@@ -347,7 +347,7 @@ class NetworkClient:
         resource_database = default_database.resource_database_for(game)
 
         await self.on_game_session_pickups_update(MultiplayerPickups(
-            id=uuid.UUID(data["id"]),
+            world_id=uuid.UUID(data["id"]),
             game=game,
             pickups=tuple(
                 (item["provider_name"], _decode_pickup(item["pickup"], resource_database))
@@ -447,17 +447,18 @@ class NetworkClient:
     async def get_game_session_list(self, ignore_limit: bool) -> list[MultiplayerSessionListEntry]:
         return [
             MultiplayerSessionListEntry.from_json(item)
-            for item in await self._emit_with_result("list_game_sessions", (None if ignore_limit else 100,))
+            for item in await self._emit_with_result("multiplayer_list_sessions", (None if ignore_limit else 100,))
         ]
 
     async def create_new_session(self, session_name: str) -> MultiplayerSessionEntry:
-        result = await self._emit_with_result("create_game_session", session_name)
+        result = await self._emit_with_result("multiplayer_create_session", session_name)
         self._current_game_session_meta = MultiplayerSessionEntry.from_json(result)
         return self._current_game_session_meta
 
     async def join_game_session(self, session: MultiplayerSessionListEntry, password: str | None):
-        result = await self._emit_with_result("join_game_session", (session.id, password))
+        result = await self._emit_with_result("multiplayer_join_session", (session.id, password))
         self._current_game_session_meta = MultiplayerSessionEntry.from_json(result)
+        return self._current_game_session_meta
 
     async def leave_game_session(self, permanent: bool):
         if permanent:

@@ -23,12 +23,15 @@ def _encrypt_session_for_user(sio: ServerApp, session: dict) -> bytes:
 
 def _create_client_side_session_raw(sio: ServerApp, user: User) -> dict:
     logger().info(f"Client at {sio.current_client_ip()} is user {user.name} ({user.id}).")
+    memberships: list[MultiplayerMembership] = list(
+        MultiplayerMembership.select().where(MultiplayerMembership.user == user)
+    )
 
     return {
         "user": user.as_json,
         "sessions": [
-            membership.session.create_list_entry()
-            for membership in MultiplayerMembership.select().where(MultiplayerMembership.user == user)
+            membership.session.create_list_entry().as_json
+            for membership in memberships
         ],
     }
 
