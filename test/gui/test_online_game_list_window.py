@@ -4,7 +4,7 @@ from unittest.mock import patch, AsyncMock, MagicMock
 from PySide6.QtWidgets import QDialog
 
 from randovania.gui.dialog.online_game_list_dialog import OnlineGameListDialog
-from randovania.network_client.multiplayer_session import MultiplayerSessionListEntry
+from randovania.network_common.multiplayer_session import MultiplayerSessionListEntry
 from randovania.network_common.session_state import MultiplayerSessionState
 
 

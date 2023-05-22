@@ -1,9 +1,10 @@
+import peewee
 import pytest
 from peewee import SqliteDatabase
 
 from randovania.layout.layout_description import LayoutDescription
 from randovania.lib import construct_lib
-from randovania.network_common.binary_formats import BinaryMultiplayerSessionEntry
+# from randovania.network_common.binary_formats import BinaryMultiplayerSessionEntry
 from randovania.server import database
 
 
@@ -46,3 +47,26 @@ def test_GameSession_create_session_entry(clean_database, has_description, test_
         'presets': [],
         'state': 'setup',
     }
+
+
+def test_fun(clean_database):
+    user1 = database.User.create(name="Someone")
+    user2 = database.User.create(name="Other")
+    session1 = database.MultiplayerSession.create(name="Debug1", creator=user1)
+    session2 = database.MultiplayerSession.create(name="Debug2", creator=user1)
+    world1 = database.World.create(session=session1, name="World1", preset="{}")
+    world2 = database.World.create(session=session1, name="World2", preset="{}")
+    world3 = database.World.create(session=session1, name="World3", preset="{}")
+    world4 = database.World.create(session=session2, name="World4", preset="{}")
+    a1 = database.WorldUserAssociation.create(world=world1, user=user1, connection_state="A")
+    a2 = database.WorldUserAssociation.create(world=world2, user=user1, connection_state="B")
+    database.WorldUserAssociation.create(world=world3, user=user2, connection_state="C")
+    database.WorldUserAssociation.create(world=world4, user=user1, connection_state="D")
+
+    result = list(
+        database.WorldUserAssociation.find_all_for_user_in_session(
+            user_id=user1.id, session_id=session1.id,
+        )
+    )
+
+    assert result == [a1, a2]

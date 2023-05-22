@@ -9,12 +9,12 @@ from PySide6 import QtWidgets, QtCore
 from randovania.gui.lib import async_dialog
 from randovania.gui.lib.qt_network_client import QtNetworkClient
 from randovania.layout.versioned_preset import VersionedPreset
-from randovania.network_client.multiplayer_session import (
-    MultiplayerUser, MultiplayerSessionEntry, MultiplayerWorldActions,
-    MultiplayerPickups, MultiplayerSessionAuditLog, WorldUserInventory
+from randovania.network_common.multiplayer_session import (
+    MultiplayerSessionEntry, MultiplayerWorldActions,
+    MultiplayerSessionAuditLog, WorldUserInventory
 )
 from randovania.network_client.network_client import UnableToConnect
-from randovania.network_common.admin_actions import SessionAdminUserAction
+from randovania.network_common import admin_actions
 from randovania.network_common.error import (
     InvalidAction, ServerError, NotLoggedIn, NotAuthorizedForAction,
     UserNotAuthorized, UnsupportedClient, RequestTimeout
@@ -91,54 +91,65 @@ class MultiplayerSessionApi(QtCore.QObject):
         self.network_client = network_client
         self.current_entry = entry
 
-    async def _admin_user_action(self, player: MultiplayerUser, action: SessionAdminUserAction, arg):
-        # self.setEnabled(False)
+    async def session_admin_global(self, action: admin_actions.SessionAdminGlobalAction, arg):
         try:
-            return await self.network_client.session_admin_player(player.id, action, arg)
+            self.widget_root.setEnabled(False)
+            return await self.network_client.server_call(
+                "multiplayer_admin_session",
+                (self.current_entry.id, action.value, arg))
         finally:
-            pass
-            # self.setEnabled(True)
+            self.widget_root.setEnabled(True)
+
+    async def session_admin_player(self, user_id: int, action: admin_actions.SessionAdminUserAction, arg):
+        try:
+            self.widget_root.setEnabled(False)
+            return await self.network_client.server_call(
+                "multiplayer_admin_player",
+                (self.current_entry.id, user_id, action.value, arg)
+            )
+        finally:
+            self.widget_root.setEnabled(True)
 
     @handle_network_errors
-    async def replace_preset_for(self, preset_id: uuid.UUID, preset: VersionedPreset):
-        # self._game_session.get_game(preset_id).preset = preset
-        print(f"{preset.name} for {preset_id}")
+    async def replace_preset_for(self, world_uid: uuid.UUID, preset: VersionedPreset):
+        # self._game_session.get_game(world_uid).preset = preset
+        print(f"{preset.name} for {world_uid}")
 
     @handle_network_errors
-    async def claim_preset_for(self, preset_id: uuid.UUID, owner: int):
+    async def claim_world_for(self, world_uid: uuid.UUID, owner: int):
         # for p in self._game_session.players:
         #     if p.id == owner:
-        #         p.games[preset_id] = "Disconnected"
+        #         p.games[world_uid] = "Disconnected"
 
-        print(f"Will claim {preset_id} to {owner}")
+        print(f"Will claim {world_uid} to {owner}")
 
     @handle_network_errors
-    async def unclaim_preset(self, preset_id: uuid.UUID):
+    async def unclaim_world(self, world_uid: uuid.UUID):
         # for p in self._game_session.players:
-        #     p.games.pop(preset_id, None)
+        #     p.games.pop(world_uid, None)
 
-        print(f"Will unclaim {preset_id}")
-
-    @handle_network_errors
-    async def delete_preset(self, preset_id: uuid.UUID):
-        # self._game_session.games.remove(self._game_session.get_game(preset_id))
-        #
-        # for p in self._game_session.players:
-        #     p.games.pop(preset_id, None)
-
-        print(f"Will delete {preset_id}")
+        print(f"Will unclaim {world_uid}")
 
     @handle_network_errors
-    async def create_new_preset(self, name: str, preset: VersionedPreset, owner: int | None):
-        print(f"Create game named {name}")
+    async def delete_world(self, world_uid: uuid.UUID):
+        print(f"Will delete {world_uid}")
+        await self.session_admin_global(
+            admin_actions.SessionAdminGlobalAction.DELETE_WORLD,
+            str(world_uid),
+        )
 
-        # new_preset_id = uuid.uuid4()
-        # self._game_session.games.append(SessionGame(
-        #     id=new_preset_id,
-        #     name=new_name,
-        #     preset=preset,
-        # ))
-        # you.games[new_preset_id] = "Disconnected"
+    @handle_network_errors
+    async def create_new_world(self, name: str, preset: VersionedPreset, owner: int):
+        await self.session_admin_player(
+            owner, admin_actions.SessionAdminUserAction.CREATE_WORLD_FOR,
+            (name, preset.as_json)
+        )
 
-    async def create_patcher_file(self, preset_id, as_json):
+    async def create_patcher_file(self, world_uid, as_json):
         pass
+
+    async def request_session_update(self):
+        await self.network_client.server_call(
+            "multiplayer_request_session_update",
+            self.current_entry.id
+        )

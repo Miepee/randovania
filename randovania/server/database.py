@@ -4,7 +4,7 @@ import datetime
 import enum
 import json
 import uuid
-from typing import Any, Self
+from typing import Any, Self, Iterable
 
 import cachetools
 import peewee
@@ -16,10 +16,9 @@ from randovania.games.game import RandovaniaGame
 from randovania.layout.layout_description import LayoutDescription
 from randovania.layout.preset import Preset
 from randovania.layout.versioned_preset import VersionedPreset
-from randovania.network_client.multiplayer_session import MultiplayerSessionEntry, MultiplayerUser, GameDetails, \
-    MultiplayerWorld, MultiplayerSessionListEntry
-from randovania.network_common.binary_formats import BinaryGameSessionActions, \
-    BinaryGameSessionAuditLog
+from randovania.network_common.multiplayer_session import MultiplayerSessionEntry, MultiplayerUser, GameDetails, \
+    MultiplayerWorld, MultiplayerSessionListEntry, BinaryGameSessionActions, MultiplayerSessionAuditLog, \
+    MultiplayerSessionAuditEntry
 from randovania.network_common.session_state import MultiplayerSessionState
 
 
@@ -218,7 +217,12 @@ class MultiplayerSession(BaseModel):
                     id=member.user.id,
                     name=member.user.name,
                     admin=member.admin,
-                    worlds={},
+                    worlds={
+                        association.world.uuid: association.connection_state
+                        for association in WorldUserAssociation.find_all_for_user_in_session(
+                            member.user.id, self.id,
+                        )
+                    },
                 )
                 for member in self.members
             ],
@@ -226,21 +230,24 @@ class MultiplayerSession(BaseModel):
                 MultiplayerWorld(
                     id=world.uuid,
                     name=world.name,
-                    preset=world.preset,
+                    preset_raw=world.preset,
                 )
                 for world in self.worlds
             ],
             game_details=game_details,
             generation_in_progress=(self.generation_in_progress.id
                                     if self.generation_in_progress is not None else None),
-            allowed_games=[],
+            allowed_games=self.allowed_games,
         )
 
-    def get_audit_log(self):
-        return BinaryGameSessionAuditLog.build([
-            entry.as_json
-            for entry in self.audit_log
-        ])
+    def get_audit_log(self) -> MultiplayerSessionAuditLog:
+        return MultiplayerSessionAuditLog(
+            session_id=self.id,
+            entries=[
+                entry.as_entry()
+                for entry in self.audit_log
+            ]
+        )
 
     def reset_layout_description(self):
         self.layout_description_json = None
@@ -280,6 +287,13 @@ class WorldUserAssociation(BaseModel):
     def get_by_ids(cls, world_uid: uuid.UUID, user_id: int) -> Self:
         return cls.get(
             WorldUserAssociation.world.uuid == world_uid,
+            WorldUserAssociation.user == user_id,
+        )
+
+    @classmethod
+    def find_all_for_user_in_session(cls, user_id: int, session_id: int) -> Iterable[Self]:
+        yield from cls.select().join(World).where(
+            World.session == session_id,
             WorldUserAssociation.user == user_id,
         )
 
@@ -328,15 +342,14 @@ class MultiplayerAuditEntry(BaseModel):
     message: str = peewee.TextField()
     time: str = peewee.DateTimeField(default=_datetime_now)
 
-    @property
-    def as_json(self):
+    def as_entry(self) -> MultiplayerSessionAuditEntry:
         time = datetime.datetime.fromisoformat(self.time)
 
-        return {
-            "user": self.user.name,
-            "message": self.message,
-            "time": time.astimezone(datetime.timezone.utc).isoformat(),
-        }
+        return MultiplayerSessionAuditEntry(
+            user=self.user.name,
+            message=self.message,
+            time=time,
+        )
 
 
 all_classes = [

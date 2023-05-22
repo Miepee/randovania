@@ -11,7 +11,7 @@ from randovania.game_connection.connector.remote_connector import RemoteConnecto
 from randovania.game_connection.game_connection import GameConnection, ConnectedGameState
 from randovania.gui.lib.qt_network_client import QtNetworkClient
 from randovania.lib import json_lib
-from randovania.network_client.multiplayer_session import MultiplayerPickups
+from randovania.network_common.multiplayer_session import MultiplayerPickups
 from randovania.network_client.network_client import UnableToConnect
 from randovania.network_common import error
 

@@ -10,7 +10,7 @@ from randovania.game_connection.connector_builder_choice import ConnectorBuilder
 from randovania.game_description.resources.item_resource_info import ItemResourceInfo, InventoryItem, Inventory
 from randovania.game_description.resources.pickup_entry import PickupEntry, PickupModel
 from randovania.games.game import RandovaniaGame
-from randovania.network_client.multiplayer_session import MultiplayerPickups
+from randovania.network_common.multiplayer_session import MultiplayerPickups
 from randovania.network_client.network_client import NetworkClient, ConnectionState, _decode_pickup
 from randovania.network_common import connection_headers
 from randovania.network_common.admin_actions import SessionAdminGlobalAction, SessionAdminUserAction
@@ -105,7 +105,7 @@ async def test_connect_to_server(tmpdir):
 
 
 async def test_session_admin_global(client):
-    client._emit_with_result = AsyncMock()
+    client.server_call = AsyncMock()
     client._current_game_session_meta = MagicMock()
     client._current_game_session_meta.id = 1234
 
@@ -113,13 +113,13 @@ async def test_session_admin_global(client):
     result = await client.session_admin_global(SessionAdminGlobalAction.CHANGE_WORLD, 5)
 
     # Assert
-    assert result == client._emit_with_result.return_value
-    client._emit_with_result.assert_awaited_once_with("game_session_admin_session", (1234, "change_row", 5))
+    assert result == client.server_call.return_value
+    client.server_call.assert_awaited_once_with("game_session_admin_session", (1234, "change_row", 5))
 
 
 @pytest.mark.parametrize("permanent", [False, True])
 async def test_leave_game_session(client: NetworkClient, permanent: bool):
-    client._emit_with_result = AsyncMock()
+    client.server_call = AsyncMock()
     client._current_game_session_meta = MagicMock()
     client._current_game_session_meta.id = 1234
     client._current_user = MagicMock()
@@ -133,7 +133,7 @@ async def test_leave_game_session(client: NetworkClient, permanent: bool):
     if permanent:
         calls.insert(0, call("game_session_admin_player", (1234, 5678, SessionAdminUserAction.KICK.value, None)))
 
-    client._emit_with_result.assert_has_awaits(calls)
+    client.server_call.assert_has_awaits(calls)
 
     assert client._current_game_session_meta is None
 
@@ -146,7 +146,7 @@ async def test_emit_with_result_timeout(client: NetworkClient):
 
     # Run
     with pytest.raises(RequestTimeout, match="Timeout after "):
-        await client._emit_with_result("test_event")
+        await client.server_call("test_event")
 
 
 def test_update_timeout_with_increase(client: NetworkClient):
@@ -241,7 +241,7 @@ def test_decode_pickup(client: NetworkClient, echoes_resource_database, generic_
 
 
 async def test_session_self_update(client: NetworkClient):
-    client._emit_with_result = AsyncMock()
+    client.server_call = AsyncMock()
     client._current_game_session_meta = MagicMock()
     client._current_game_session_meta.id = 1234
 
@@ -250,7 +250,7 @@ async def test_session_self_update(client: NetworkClient):
     await client.session_self_update(RandovaniaGame.METROID_PRIME_ECHOES, inventory,
                                      GameConnectionStatus.InGame, ConnectorBuilderChoice.DOLPHIN)
 
-    client._emit_with_result.assert_awaited_once_with(
+    client.server_call.assert_awaited_once_with(
         "game_session_self_update",
         (1234, b'\x01prime2\x00\x01None\x00\x01\x01', "In-game (Dolphin)")
     )

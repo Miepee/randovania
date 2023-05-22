@@ -1,5 +1,4 @@
 import dataclasses
-from typing import NamedTuple
 
 from frozendict import frozendict
 
@@ -19,7 +18,8 @@ class ItemResourceInfo:
         return self.long_name
 
 
-class InventoryItem(NamedTuple):
+@dataclasses.dataclass(frozen=True, slots=True)
+class InventoryItem:
     amount: int
     capacity: int
 

@@ -21,6 +21,7 @@ class SessionAdminGlobalAction(Enum):
 class SessionAdminUserAction(Enum):
     """Actions that operate on top of a user"""
     KICK = "kick"
+    CREATE_WORLD_FOR = "create_world_for"
     CLAIM = "claim"
     UNCLAIM = "unclaim"
     SWITCH_ADMIN = "switch_admin"

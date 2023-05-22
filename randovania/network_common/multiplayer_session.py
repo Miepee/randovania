@@ -4,12 +4,12 @@ import dataclasses
 import datetime
 import uuid
 
+from randovania.bitpacking import construct_dataclass
 from randovania.bitpacking.json_dataclass import JsonDataclass
 from randovania.game_description.resources.item_resource_info import InventoryItem
 from randovania.game_description.resources.pickup_entry import PickupEntry
 from randovania.game_description.resources.pickup_index import PickupIndex
 from randovania.games.game import RandovaniaGame
-from randovania.layout.versioned_preset import VersionedPreset
 from randovania.network_common.session_state import MultiplayerSessionState
 
 
@@ -40,7 +40,7 @@ class MultiplayerUser(JsonDataclass):
 class MultiplayerWorld(JsonDataclass):
     id: uuid.UUID
     name: str
-    preset: VersionedPreset
+    preset_raw: str
 
 
 @dataclasses.dataclass(frozen=True)
@@ -66,7 +66,7 @@ class MultiplayerWorldAction(JsonDataclass):
 @dataclasses.dataclass(frozen=True)
 class MultiplayerWorldActions:
     session_id: int
-    actions: tuple[MultiplayerWorldAction, ...]
+    actions: list[MultiplayerWorldAction]  # TODO: use tuple
 
 
 @dataclasses.dataclass(frozen=True)
@@ -113,9 +113,9 @@ class MultiplayerSessionAuditEntry(JsonDataclass):
 
 
 @dataclasses.dataclass(frozen=True)
-class MultiplayerSessionAuditLog:
+class MultiplayerSessionAuditLog(JsonDataclass):
     session_id: int
-    entries: tuple[MultiplayerSessionAuditEntry, ...]
+    entries: list[MultiplayerSessionAuditEntry]  # TODO: restore tuple
 
 
 @dataclasses.dataclass(frozen=True)
@@ -146,3 +146,8 @@ class User:
             "name": self.name,
             "discord_id": self.discord_id,
         }
+
+
+BinaryInventory = construct_dataclass.construct_for_type(WorldUserInventory)
+BinaryGameSessionActions = construct_dataclass.construct_for_type(MultiplayerWorldActions)
+BinaryMultiplayerSessionAuditLog = construct_dataclass.construct_for_type(MultiplayerSessionAuditLog)

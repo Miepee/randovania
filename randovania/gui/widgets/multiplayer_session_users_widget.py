@@ -1,5 +1,4 @@
 import functools
-import functools
 import uuid
 
 from PySide6 import QtWidgets, QtGui, QtCore
@@ -13,7 +12,8 @@ from randovania.gui.lib.multiplayer_session_api import MultiplayerSessionApi
 from randovania.interface_common.options import Options, InfoAlert
 from randovania.interface_common.preset_manager import PresetManager
 from randovania.layout import preset_describer
-from randovania.network_client.multiplayer_session import MultiplayerSessionEntry, MultiplayerWorld
+from randovania.layout.versioned_preset import VersionedPreset
+from randovania.network_common.multiplayer_session import MultiplayerSessionEntry, MultiplayerWorld
 from randovania.network_common.session_state import MultiplayerSessionState
 
 
@@ -21,6 +21,7 @@ def make_tool(text: str):
     tool = QtWidgets.QToolButton()
     tool.setText(text)
     tool.setPopupMode(QtWidgets.QToolButton.ToolButtonPopupMode.InstantPopup)
+    tool.setMinimumWidth(100)
     tool.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonIconOnly)
     return tool
 
@@ -34,7 +35,7 @@ def connect_to(action: QtGui.QAction, target, *args):
 class MultiplayerSessionUsersWidget(QtWidgets.QTreeWidget):
     GameExportRequested = Signal(RandovaniaGame, dict)
 
-    _game_session: MultiplayerSessionEntry
+    _session: MultiplayerSessionEntry
 
     def __init__(self, options: Options, preset_manager: PresetManager, session_api: MultiplayerSessionApi):
         super().__init__()
@@ -69,27 +70,26 @@ class MultiplayerSessionUsersWidget(QtWidgets.QTreeWidget):
     #
 
     @asyncSlot()
-    async def _preset_replace(self, game: RandovaniaGame, preset_id: uuid.UUID):
+    async def _preset_replace(self, game: RandovaniaGame, world_uid: uuid.UUID):
         preset = await self._prompt_for_preset(game)
         if preset is not None:
-            await self._session_api.replace_preset_for(preset_id, preset)
+            await self._session_api.replace_preset_for(world_uid, preset)
 
     @asyncSlot()
-    async def _preset_claim_with(self, preset_id: uuid.UUID, owner: int):
-        await self._session_api.claim_preset_for(preset_id, owner)
+    async def _preset_claim_with(self, world_uid: uuid.UUID, owner: int):
+        await self._session_api.claim_world_for(world_uid, owner)
 
     @asyncSlot()
-    async def _preset_unclaim(self, preset_id: uuid.UUID):
-        await self._session_api.unclaim_preset(preset_id)
+    async def _preset_unclaim(self, world_uid: uuid.UUID):
+        await self._session_api.unclaim_world(world_uid)
 
     @asyncSlot()
-    async def _preset_delete(self, preset_id: uuid.UUID):
-        await self._session_api.delete_preset(preset_id)
+    async def _preset_delete(self, world_uid: uuid.UUID):
+        await self._session_api.delete_world(world_uid)
 
     @asyncSlot()
-    async def _preset_view_summary(self, preset_id: uuid.UUID):
-        game = self._game_session.get_world(preset_id)
-        preset = game.preset.get_preset()
+    async def _preset_view_summary(self, world_uid: uuid.UUID):
+        preset = self._get_preset(world_uid).get_preset()
         description = preset_describer.merge_categories(preset_describer.describe(preset))
 
         message_box = QtWidgets.QMessageBox(self)
@@ -99,8 +99,8 @@ class MultiplayerSessionUsersWidget(QtWidgets.QTreeWidget):
         await async_dialog.execute_dialog(message_box)
 
     @asyncSlot()
-    async def _preset_customize(self, preset_id: uuid.UUID):
-        print("customize preset", preset_id)
+    async def _preset_customize(self, world_uid: uuid.UUID):
+        print("customize preset", world_uid)
         # if self._logic_settings_window is not None:
         #     if self._logic_settings_window._game_session_row == row:
         #         self._logic_settings_window.raise_()
@@ -135,9 +135,12 @@ class MultiplayerSessionUsersWidget(QtWidgets.QTreeWidget):
         #
         #     await self._do_import_preset(row_index, new_preset)
 
+    def _get_preset(self, world_uid: uuid.UUID) -> VersionedPreset:
+        return VersionedPreset.from_str(self._session.get_world(world_uid).preset_raw)
+
     @asyncSlot()
-    async def _preset_save_copy(self, preset_id: uuid.UUID):
-        preset = self._game_session.get_world(preset_id).preset
+    async def _preset_save_copy(self, world_uid: uuid.UUID):
+        preset = self._get_preset(world_uid)
 
         if preset.is_included_preset:
             # Nothing to do, this is an included preset
@@ -146,16 +149,16 @@ class MultiplayerSessionUsersWidget(QtWidgets.QTreeWidget):
         self._preset_manager.add_new_preset(preset)
 
     @asyncSlot()
-    async def _preset_save_to_file(self, preset_id: uuid.UUID):
+    async def _preset_save_to_file(self, world_uid: uuid.UUID):
         path = common_qt_lib.prompt_user_for_preset_file(self, new_file=True)
         if path is None:
             return
 
-        preset = self._game_session.get_world(preset_id).preset
+        preset = self._get_preset(world_uid)
         preset.save_to_file(path)
 
     @asyncSlot()
-    async def _game_export(self, preset_id: uuid.UUID):
+    async def _world_export(self, world_uid: uuid.UUID):
         options = self._options
 
         if not options.is_alert_displayed(InfoAlert.MULTIWORLD_FAQ):
@@ -164,121 +167,123 @@ class MultiplayerSessionUsersWidget(QtWidgets.QTreeWidget):
                                            "It can be found in the main Randovania window → Help → Multiworld")
             options.mark_alert_as_displayed(InfoAlert.MULTIWORLD_FAQ)
 
-        game_enum = self._game_session.get_world(preset_id).preset.game
+        game_enum = self._get_preset(world_uid).game
         patch_data = await self._session_api.create_patcher_file(
-            preset_id, options.options_for_game(game_enum).cosmetic_patches.as_json
+            world_uid, options.options_for_game(game_enum).cosmetic_patches.as_json
         )
         self.GameExportRequested.emit(game_enum, patch_data)
 
     #
 
     @asyncSlot()
-    async def _new_game(self, game: RandovaniaGame, user_id: int):
+    async def _new_world(self, game: RandovaniaGame, user_id: int):
         preset = await self._prompt_for_preset(game)
         if preset is None:
             return
 
-        user = self._game_session.users[user_id]
+        user = self._session.users[user_id]
         if not user.worlds:
             new_name = user.name
         else:
             new_name = f"{user.name} ({len(user.worlds) + 1})"
 
         # Temp
-        await self._session_api.create_new_preset(new_name, preset, user_id)
+        await self._session_api.create_new_world(new_name, preset, user_id)
 
     #
 
-    def _fill_menu_for_game_replace_preset(self, menu: QtWidgets.QMenu, preset_id: uuid.UUID):
-        for g in RandovaniaGame.all_games():
+    def _fill_menu_for_world_replace_preset(self, menu: QtWidgets.QMenu, world_uid: uuid.UUID):
+        for g in self._session.allowed_games:
             connect_to(
                 menu.addAction(g.long_name),
-                self._preset_replace, g, preset_id,
+                self._preset_replace, g, world_uid,
             )
 
     def _fill_menu_for_new_game(self, menu: QtWidgets.QMenu, user: int):
-        for g in RandovaniaGame.all_games():
+        for g in self._session.allowed_games:
             connect_to(
                 menu.addAction(g.long_name),
-                self._new_game, g, user,
+                self._new_world, g, user,
             )
 
     def is_admin(self) -> bool:
-        return self._game_session.users[self.your_id].admin
+        return self._session.users[self.your_id].admin
 
     def update_state(self, game_session: MultiplayerSessionEntry):
         self.clear()
 
-        self._game_session = game_session
-        in_setup = self._game_session.state == MultiplayerSessionState.SETUP
-        has_layout = self._game_session.game_details is not None
+        self._session = game_session
+        in_setup = self._session.state == MultiplayerSessionState.SETUP
+        has_layout = self._session.game_details is not None
 
-        game_by_id: dict[uuid.UUID, MultiplayerWorld] = {
+        world_by_id: dict[uuid.UUID, MultiplayerWorld] = {
             game.id: game
             for game in game_session.worlds
         }
-        used_games = set()
+        used_worlds = set()
 
-        def _add_game(game_details: MultiplayerWorld, parent: QtWidgets.QTreeWidgetItem,
-                      owner: int | None, game_state: str):
-            game_item = QtWidgets.QTreeWidgetItem(parent)
+        def _add_world(world_details: MultiplayerWorld, parent: QtWidgets.QTreeWidgetItem,
+                       owner: int | None, user_world_state: str):
+            
+            preset = VersionedPreset.from_str(world_details.preset_raw)
+            world_item = QtWidgets.QTreeWidgetItem(parent)
             # game_item.setFlags(game_item.flags() | Qt.ItemFlag.ItemIsEditable)
-            game_item.setText(0, game_details.name)
-            game_item.setText(1, game_details.preset.game.long_name)
-            game_item.setText(2, game_state)
+            world_item.setText(0, world_details.name)
+            world_item.setText(1, preset.game.long_name)
+            world_item.setText(2, user_world_state)
 
-            game_tool = make_tool("Actions")
+            world_tool = make_tool("Actions")
 
-            game_menu = QtWidgets.QMenu(game_tool)
-            preset_menu = game_menu.addMenu(f"Preset: {game_details.preset.name}")
+            world_menu = QtWidgets.QMenu(world_tool)
+            preset_menu = world_menu.addMenu(f"Preset: {preset.name}")
             connect_to(preset_menu.addAction("View summary"),
-                       self._preset_view_summary, game_details.id)
+                       self._preset_view_summary, world_details.id)
 
             if owner == self.your_id or self.is_admin():
                 customize_action = preset_menu.addAction("Customize")
                 customize_action.setEnabled(not has_layout)
                 connect_to(customize_action,
-                           self._preset_customize, game_details.id)
+                           self._preset_customize, world_details.id)
 
-                self._fill_menu_for_game_replace_preset(replace_with_menu := preset_menu.addMenu("Replace with"),
-                                                        game_details.id)
+                self._fill_menu_for_world_replace_preset(replace_with_menu := preset_menu.addMenu("Replace with"),
+                                                         world_details.id)
                 replace_with_menu.setEnabled(not has_layout)
 
             export_menu = preset_menu.addMenu("Export preset")
-            connect_to(export_menu.addAction("Save copy of preset"), self._preset_save_copy, game_details.id)
-            connect_to(export_menu.addAction("Save to file"), self._preset_save_to_file, game_details.id)
+            connect_to(export_menu.addAction("Save copy of preset"), self._preset_save_copy, world_details.id)
+            connect_to(export_menu.addAction("Save to file"), self._preset_save_to_file, world_details.id)
 
             if owner == self.your_id:
-                export_action = game_menu.addAction("Export game")
+                export_action = world_menu.addAction("Export game")
                 export_action.setEnabled(has_layout)
-                connect_to(export_action, self._game_export, game_details.id)
+                connect_to(export_action, self._world_export, world_details.id)
 
             if owner is None:
-                game_menu.addSeparator()
-                connect_to(game_menu.addAction("Claim for yourself"),
-                           self._preset_claim_with, game_details.id,
+                world_menu.addSeparator()
+                connect_to(world_menu.addAction("Claim for yourself"),
+                           self._preset_claim_with, world_details.id,
                            self.your_id)
 
                 if self.is_admin():
-                    claim_menu = game_menu.addMenu("Claim for")
-                    for p in self._game_session.users:
+                    claim_menu = world_menu.addMenu("Claim for")
+                    for p in self._session.users.values():
                         connect_to(claim_menu.addAction(p.name),
-                                   self._preset_claim_with, game_details.id,
+                                   self._preset_claim_with, world_details.id,
                                    p.id)
 
             elif self.is_admin():
-                game_menu.addSeparator()
-                connect_to(game_menu.addAction("Unclaim"), self._preset_unclaim, game_details.id)
+                world_menu.addSeparator()
+                connect_to(world_menu.addAction("Unclaim"), self._preset_unclaim, world_details.id)
 
             if owner == self.your_id or self.is_admin():
-                game_menu.addSeparator()
-                delete_action = game_menu.addAction("Delete")
+                world_menu.addSeparator()
+                delete_action = world_menu.addAction("Delete")
                 delete_action.setEnabled(not has_layout)
-                connect_to(delete_action, self._preset_delete, game_details.id)
+                connect_to(delete_action, self._preset_delete, world_details.id)
 
-            game_tool.setMenu(game_menu)
+            world_tool.setMenu(world_menu)
 
-            self.setItemWidget(game_item, 3, game_tool)
+            self.setItemWidget(world_item, 3, world_tool)
 
         for player in game_session.users.values():
             item = QtWidgets.QTreeWidgetItem(self)
@@ -287,9 +292,9 @@ class MultiplayerSessionUsersWidget(QtWidgets.QTreeWidget):
             if player.admin:
                 item.setText(1, "(Admin)")
 
-            for preset_id, state in player.worlds.items():
-                used_games.add(preset_id)
-                _add_game(game_by_id[preset_id], item, player.id, state)
+            for world_uid, state in player.worlds.items():
+                used_worlds.add(world_uid)
+                _add_world(world_by_id[world_uid], item, player.id, state)
 
             if player.id != self.your_id and self.is_admin():
                 tool = make_tool("Administrate")
@@ -301,20 +306,20 @@ class MultiplayerSessionUsersWidget(QtWidgets.QTreeWidget):
 
             if in_setup and (player.id == self.your_id or self.is_admin()):
                 new_game_item = QtWidgets.QTreeWidgetItem(item)
-                tool = make_tool("New game")
+                tool = make_tool("New world")
                 menu = QtWidgets.QMenu(tool)
                 self._fill_menu_for_new_game(menu, player.id)
                 tool.setMenu(menu)
                 self.setItemWidget(new_game_item, 0, tool)
 
-        missing_games = set(game_by_id.keys()) - used_games
+        missing_games = set(world_by_id.keys()) - used_worlds
         if missing_games:
             missing_game_item = QtWidgets.QTreeWidgetItem(self)
             missing_game_item.setExpanded(True)
             missing_game_item.setText(0, "Unclaimed Games")
 
-            for preset_id in missing_games:
-                _add_game(game_by_id[preset_id], missing_game_item, None, "Abandoned")
+            for world_uid in missing_games:
+                _add_world(world_by_id[world_uid], missing_game_item, None, "Abandoned")
 
         self.resizeColumnToContents(0)
         self.resizeColumnToContents(1)

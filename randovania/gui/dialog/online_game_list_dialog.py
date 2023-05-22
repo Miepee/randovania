@@ -7,7 +7,7 @@ from qasync import asyncSlot
 from randovania.gui.generated.multiplayer_session_browser_dialog_ui import Ui_MultiplayerSessionBrowserDialog
 from randovania.gui.lib import common_qt_lib, async_dialog
 from randovania.gui.lib.qt_network_client import handle_network_errors, QtNetworkClient
-from randovania.network_client.multiplayer_session import MultiplayerSessionListEntry, MultiplayerSessionEntry
+from randovania.network_common.multiplayer_session import MultiplayerSessionListEntry, MultiplayerSessionEntry
 from randovania.network_client.network_client import ConnectionState
 from randovania.network_common.error import WrongPassword
 from randovania.network_common.session_state import MultiplayerSessionState

@@ -4,9 +4,10 @@ import uuid
 import construct
 import flask_socketio
 
+from randovania.bitpacking import construct_dataclass
 from randovania.lib.construct_lib import convert_to_raw_python
 from randovania.network_common import signals
-from randovania.network_common.binary_formats import BinaryInventory
+from randovania.network_common.multiplayer_session import BinaryInventory, BinaryMultiplayerSessionAuditLog
 from randovania.server.database import MultiplayerSession, MultiplayerAuditEntry, \
     WorldUserAssociation, World
 from randovania.server.lib import logger
@@ -63,7 +64,8 @@ def emit_session_actions_update(session: MultiplayerSession):
 
 def emit_session_audit_update(session: MultiplayerSession):
     logger().debug("game_session_audit_update for session %d (%s)", session.id, session.name)
-    emit_session_global_event(session, signals.SESSION_AUDIT_UPDATE, session.get_audit_log())
+    emit_session_global_event(session, signals.SESSION_AUDIT_UPDATE,
+                              construct_dataclass.encode_json_dataclass(session.get_audit_log()))
 
 
 def add_audit_entry(sio: ServerApp, session: MultiplayerSession, message: str):

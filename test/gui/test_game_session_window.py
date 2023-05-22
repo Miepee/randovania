@@ -10,7 +10,7 @@ from randovania.games.game import RandovaniaGame
 from randovania.gui.multiplayer_session_window import MultiplayerSessionWindow
 from randovania.layout.generator_parameters import GeneratorParameters
 from randovania.layout.permalink import Permalink
-from randovania.network_client.multiplayer_session import (
+from randovania.network_common.multiplayer_session import (
     MultiplayerSessionEntry, MultiplayerUser, User, MultiplayerWorldAction,
     MultiplayerWorldActions, GameDetails,
 )
@@ -95,7 +95,7 @@ async def test_on_game_session_actions_update(window: MultiplayerSessionWindow, 
     # Setup
     game_session = MagicMock()
     game_session.presets = [default_echoes_preset]
-    window._game_session = game_session
+    window._session = game_session
     timestamp = datetime.datetime(year=2020, month=1, day=5)
 
     # Run
@@ -475,8 +475,8 @@ async def test_on_close_event(window: MultiplayerSessionWindow, mocker, is_membe
     # Setup
     super_close_event = mocker.patch("PySide6.QtWidgets.QMainWindow.closeEvent")
     event = MagicMock()
-    window._game_session = MagicMock()
-    window._game_session.players = [window.network_client.current_user.id] if is_member else []
+    window._session = MagicMock()
+    window._session.players = [window.network_client.current_user.id] if is_member else []
     window.network_client.leave_game_session = AsyncMock()
     window.network_client.connection_state.is_disconnected = False
 

@@ -9,7 +9,7 @@ from PySide6.QtWidgets import QWidget
 
 import randovania
 from randovania.gui.lib import async_dialog
-from randovania.network_client.multiplayer_session import MultiplayerSessionEntry, User, MultiplayerWorldActions, MultiplayerPickups, \
+from randovania.network_common.multiplayer_session import MultiplayerSessionEntry, User, MultiplayerWorldActions, MultiplayerPickups, \
     MultiplayerSessionAuditLog, WorldUserInventory
 from randovania.network_client.network_client import NetworkClient, ConnectionState, UnableToConnect
 from randovania.network_common.error import (InvalidAction, NotAuthorizedForAction, ServerError, RequestTimeout,
@@ -25,7 +25,7 @@ class QtNetworkClient(QWidget, NetworkClient):
     GameSessionMetaUpdated = Signal(MultiplayerSessionEntry)
     GameSessionActionsUpdated = Signal(MultiplayerWorldActions)
     GameSessionPickupsUpdated = Signal(MultiplayerPickups)
-    GameSessionAuditLogUpdated = Signal(MultiplayerSessionAuditLog)
+    MultiplayerAuditLogUpdated = Signal(MultiplayerSessionAuditLog)
     GameSessionInventoryUpdated = Signal(WorldUserInventory)
 
     discord: pypresence.AioClient | None = None
@@ -71,7 +71,7 @@ class QtNetworkClient(QWidget, NetworkClient):
 
     async def on_game_session_audit_update(self, audit_log: MultiplayerSessionAuditLog):
         await super().on_game_session_audit_update(audit_log)
-        self.GameSessionAuditLogUpdated.emit(audit_log)
+        self.MultiplayerAuditLogUpdated.emit(audit_log)
 
     async def on_game_session_inventory(self, inventory: WorldUserInventory):
         await super().on_game_session_inventory(inventory)
@@ -87,7 +87,7 @@ class QtNetworkClient(QWidget, NetworkClient):
 
         authorize = await self.discord.authorize(self.configuration["discord_client_id"], ['identify'])
 
-        new_session = await self._emit_with_result("login_with_discord", authorize["data"]["code"])
+        new_session = await self.server_call("login_with_discord", authorize["data"]["code"])
         await self.on_user_session_updated(new_session)
 
     async def login_as_guest(self, name: str = "Unknown"):
@@ -101,7 +101,7 @@ class QtNetworkClient(QWidget, NetworkClient):
             "date": datetime.datetime.now(datetime.timezone.utc).isoformat(),
         }).encode("utf-8"))
 
-        new_session = await self._emit_with_result("login_with_guest", login_request)
+        new_session = await self.server_call("login_with_guest", login_request)
         await self.on_user_session_updated(new_session)
 
     @property

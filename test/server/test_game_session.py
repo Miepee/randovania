@@ -20,8 +20,7 @@ from randovania.layout.layout_description import LayoutDescription
 from randovania.layout.versioned_preset import VersionedPreset
 from randovania.lib.construct_lib import convert_to_raw_python
 from randovania.network_common.admin_actions import SessionAdminUserAction, SessionAdminGlobalAction
-from randovania.network_common.binary_formats import BinaryMultiplayerSessionEntry, BinaryGameSessionActions, \
-    BinaryGameSessionAuditLog
+from randovania.network_common.multiplayer_session import BinaryGameSessionActions
 from randovania.network_common.error import InvalidAction
 from randovania.network_common.session_state import MultiplayerSessionState
 from randovania.server import database

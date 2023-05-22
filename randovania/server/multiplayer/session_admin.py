@@ -69,20 +69,23 @@ def _get_preset(preset_json: dict) -> VersionedPreset:
         raise InvalidAction(f"invalid preset: {e}")
 
 
-def _create_world(sio: ServerApp, session: MultiplayerSession, arg: tuple[str, dict]):
+def _create_world(sio: ServerApp, session: MultiplayerSession, arg: tuple[str, dict], for_user: int | None = None):
     if len(arg) != 2:
         raise InvalidAction("Missing arguments.")
-    verify_has_admin(sio, session.id, None)
+    verify_has_admin(sio, session.id, for_user)
+
     _verify_in_setup(session)
     _verify_no_layout_description(session)
     _verify_not_in_generation(session)
     name, preset_json = arg
     preset = _get_preset(preset_json)
 
-    with database.db.atomic():
-        logger().info(f"{describe_session(session)}: Creating world {name}.")
-        World.create(session=session, name=name,
-                     preset=json.dumps(preset.as_json))
+    logger().info(f"{describe_session(session)}: Creating world {name}.")
+
+    world = World.create(session=session, name=name,
+                         preset=json.dumps(preset.as_json))
+    add_audit_entry(sio, session, f"Created new world {world.name}")
+    return world
 
 
 def _change_world(sio: ServerApp, session: MultiplayerSession, arg: tuple[uuid.UUID, dict]):
@@ -107,6 +110,7 @@ def _change_world(sio: ServerApp, session: MultiplayerSession, arg: tuple[uuid.U
             world.preset = json.dumps(preset.as_json)
             logger().info(f"{describe_session(session)}: Changing world {world_uid}.")
             world.save()
+            add_audit_entry(sio, session, f"Changing world {world_uid}")
 
     except peewee.DoesNotExist:
         raise InvalidAction(f"invalid world: {world_uid}")
@@ -120,9 +124,10 @@ def _delete_world(sio: ServerApp, session: MultiplayerSession, world_uid: uuid.U
 
     world = World.get_by_uuid(world_uid)
     with database.db.atomic():
-        logger().info(f"{describe_session(session)}: Deleting {world_uid}.")
+        logger().info(f"{describe_session(session)}: Deleting {world.name} ({world_uid}).")
+        add_audit_entry(sio, session, f"Deleting world {world.name}")
         WorldUserAssociation.delete().where(WorldUserAssociation.world == world.id).execute()
-        World.delete().where(World.id == world.id).execute()
+        world.delete_instance()
 
 
 def _update_layout_generation(sio: ServerApp, session: MultiplayerSession, world_order: list[int]):
@@ -248,7 +253,7 @@ def _finish_session(sio: ServerApp, session: MultiplayerSession):
 def _change_password(sio: ServerApp, session: MultiplayerSession, password: str):
     verify_has_admin(sio, session.id, None)
 
-    session.password = _hash_password(password)
+    session.password = session_common.hash_password(password)
     logger().info(f"{describe_session(session)}: Changing password.")
     session.save()
     add_audit_entry(sio, session, "Changed password")
@@ -371,6 +376,17 @@ def _kick_user(sio: ServerApp, session: MultiplayerSession, membership: Multipla
             logger().info(f"{describe_session(session)}. Kicking user {user_id}.")
 
 
+def _create_world_for(sio: ServerApp, session: MultiplayerSession, membership: MultiplayerMembership,
+                      arg: tuple[str, dict]):
+    with database.db.atomic():
+        new_world = _create_world(sio, session, arg, membership.user.id)
+        WorldUserAssociation.create(
+            world=new_world,
+            user=membership.user,
+        )
+        add_audit_entry(sio, session, f"Associated new world {new_world.name} for {membership.user.name}")
+
+
 def _claim_world(sio: ServerApp, session: MultiplayerSession, user_id: int, world_uid: uuid.UUID):
     if not session.allow_everyone_claim_world:
         verify_has_admin(sio, session.id, None)
@@ -457,6 +473,9 @@ def admin_player(sio: ServerApp, session_id: int, user_id: int, action: str, arg
 
     if action == SessionAdminUserAction.KICK:
         _kick_user(sio, session, membership, user_id)
+
+    elif action == SessionAdminUserAction.CREATE_WORLD_FOR:
+        _create_world_for(sio, session, membership, arg)
 
     elif action == SessionAdminUserAction.CLAIM:
         _claim_world(sio, session, user_id, arg)

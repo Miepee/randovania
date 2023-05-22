@@ -4,7 +4,7 @@ from playhouse import flask_utils
 
 from randovania.game_description import default_database
 from randovania.games.game import RandovaniaGame
-from randovania.network_common.binary_formats import BinaryInventory
+from randovania.network_common.multiplayer_session import BinaryInventory
 from randovania.server.database import MultiplayerSession, WorldUserAssociation
 from randovania.server.server_app import ServerApp
 
