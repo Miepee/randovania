@@ -223,8 +223,8 @@
             "preferred_location_category": "major"
         },
         "Scan Visor": {
-            "pickup_category": "visor",
-            "broad_category": "visor",
+            "pickup_category": "movement",
+            "broad_category": "movement",
             "model_name": "Scan Visor",
             "offworld_models": {
                 "prime2": "ScanVisor INCOMPLETE"
