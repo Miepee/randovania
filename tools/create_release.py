@@ -91,8 +91,6 @@ secret = b"".join(
 
 async def main():
     package_folder = Path("dist", "randovania")
-    if package_folder.exists():
-        shutil.rmtree(package_folder, ignore_errors=False)
 
     app_folder = Path("dist", "Randovania.app")
     if app_folder.exists():
