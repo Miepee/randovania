@@ -4,7 +4,6 @@ import logging
 import multiprocessing
 import os
 import sys
-from pathlib import Path
 
 logging.basicConfig(level=logging.WARNING)
 
@@ -13,6 +12,10 @@ def main():
     multiprocessing.freeze_support()
 
     import randovania
+
+    # Add our local dotnet to path
+    dotnet_path = randovania.get_data_path().joinpath("dotnet_runtime")
+    os.environ["PATH"] += f"{os.pathsep}{dotnet_path}"
 
     randovania.setup_logging("INFO", None, quiet=True)
 
@@ -24,10 +27,4 @@ def main():
 
 
 if __name__ == "__main__":
-    # Add our local dotnet to path
-    if getattr(sys, "frozen", False):
-        application_path = sys._MEIPASS
-    else:
-        application_path = Path(__file__).resolve().parent
-    os.environ["PATH"] += f"{os.pathsep}{application_path}"
     main()

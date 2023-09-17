@@ -37,6 +37,13 @@ def open_zip(platform_name: str) -> zipfile.ZipFile:
     )
 
 
+def get_dotnet_url():
+    if platform.system() == "Windows":
+        return "https://dot.net/v1/dotnet-install.ps1"
+
+    return "https://dot.net/v1/dotnet-install.sh"
+
+
 async def get_nintendont_releases(session: aiohttp.ClientSession):
     async with session.get(_NINTENDONT_RELEASES_URL) as response:
         try:
@@ -77,6 +84,29 @@ async def download_nintendont():
         final_dol_path.write_bytes(dol_bytes)
 
 
+async def download_dotnet():
+    script_path = _ROOT_FOLDER.joinpath("dotnet.sh")
+    dotnet_path = _ROOT_FOLDER.joinpath("randovania", "data", "dotnet_runtime")
+    async with aiohttp.ClientSession() as session:
+        url = get_dotnet_url()
+        print(f"Downloading {url}")
+        async with session.get(url) as response:
+            response.raise_for_status()
+            script_bytes = await response.read()
+
+            print(f"Saving to {script_path}")
+            script_path.write_bytes(script_bytes)
+
+    print("Executing dotnet script")
+    if not platform.system() == "Windows":
+        subprocess.run(["chmod", "+x", script_path], check=True)
+    subprocess.run(
+        [script_path, "--version", "latest", "--install-dir", dotnet_path, "--runtime", "dotnet"], check=True
+    )
+    print("Removing downloaded script")
+    script_path.unlink()
+
+
 def write_obfuscator_secret(path: Path, secret: bytes):
     numbers = str(list(secret))
     path.write_text(
@@ -91,6 +121,8 @@ secret = b"".join(
 
 async def main():
     package_folder = Path("dist", "randovania")
+    if package_folder.exists():
+        shutil.rmtree(package_folder, ignore_errors=False)
 
     app_folder = Path("dist", "Randovania.app")
     if app_folder.exists():
@@ -126,6 +158,8 @@ async def main():
     json_lib.write_path(_ROOT_FOLDER.joinpath("randovania", "data", "configuration.json"), configuration)
 
     await download_nintendont()
+
+    await download_dotnet()
 
     # HACK: pyintaller calls lipo/codesign on macOS and frequently timeout in github actions
     # There's also timeouts on Windows so we're expanding this to everyone
