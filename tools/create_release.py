@@ -101,9 +101,11 @@ async def download_dotnet():
     if not platform.system() == "Windows":
         subprocess.run(["chmod", "+x", script_path], check=True)
     subprocess.run(
-        [script_path, "--version", "latest", "--install-dir", dotnet_path, "--runtime", "dotnet"],
+        [script_path, "--version", "latest", "--install-dir", f"{dotnet_path}", "--runtime", "dotnet"],
         check=True,
-        shell=True,
+        # Shell is needed for Windows due to this being a PowerShell script, and broken on unix due
+        # to arguments being interpreted differently
+        shell=platform.system() == "Windows",
     )
     print("Removing downloaded script")
     script_path.unlink()

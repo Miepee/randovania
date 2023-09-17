@@ -15,7 +15,7 @@ def main():
 
     # Add our local dotnet to path
     dotnet_path = randovania.get_data_path().joinpath("dotnet_runtime")
-    os.environ["PATH"] += f"{os.pathsep}{dotnet_path}"
+    os.environ["PATH"] = f'{dotnet_path}{os.pathsep}{os.environ["PATH"]}'
 
     randovania.setup_logging("INFO", None, quiet=True)
 
