@@ -24,7 +24,6 @@ jobs:
           - os: 'ubuntu-latest'
             python: '3.11'
             executable: true
-            download_dotnet_script: 'wget https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh && chmod +x ./dotnet-install.sh'
             name: 'Linux Executable'
 
           - os: 'macos-latest'
@@ -35,7 +34,6 @@ jobs:
           - os: 'macos-latest'
             python: '3.11'
             executable: true
-            download_dotnet_script: 'wget https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh && chmod +x ./dotnet-install.sh'
             name: 'macOS Executable'
 
           - os: 'windows-latest'
@@ -46,8 +44,6 @@ jobs:
           - os: 'windows-latest'
             python: '3.11'
             executable: true
-            # For some reason wget doesn't work here, so we use PowerShell instead.
-            download_dotnet_script: 'Invoke-WebRequest -Uri https://dot.net/v1/dotnet-install.ps1 -OutFile dotnet-install.sh'
             name: 'Windows Executable'
 
           - os: 'ubuntu-latest'
@@ -125,10 +121,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           OBFUSCATOR_SECRET: ${{ secrets.OBFUSCATOR_SECRET }}
           PRODUCTION: ${{ startsWith(github.ref, 'refs/tags/v') || startsWith(github.ref, 'refs/heads/stable') }}
-
-      - name: Install dotnet for Randovania
-        run: ${{ matrix.download_dotnet_script }} && ./dotnet-install.sh --version latest --runtime dotnet --install-dir dist/randovania/dotnet_runtime
-        if: matrix.executable
 
       - name: executable check
         run: dist/randovania/randovania --version
