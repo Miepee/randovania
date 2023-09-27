@@ -108,7 +108,7 @@ async def download_dotnet():
         check=True,
         # Shell is needed for Windows due to this being a PowerShell script, and broken on unix due
         # to arguments being interpreted differently
-        # shell=platform.system() == "Windows",
+        shell=platform.system() == "Windows",
     )
     print("Removing downloaded script")
     script_path.unlink()
