@@ -85,7 +85,7 @@ async def download_nintendont():
 
 
 async def download_dotnet():
-    script_path = _ROOT_FOLDER.joinpath("dotnet.sh")
+    script_path = _ROOT_FOLDER.joinpath("dotnet.ps1" if platform.system() == "Windows" else "dotnet.sh")
     dotnet_path = _ROOT_FOLDER.joinpath("randovania", "data", "dotnet_runtime")
     async with aiohttp.ClientSession() as session:
         url = get_dotnet_url()
