@@ -108,12 +108,9 @@ async def download_dotnet():
         f"{dotnet_path}",
         "--runtime",
         "dotnet",
-        "--architecture",
-        "x64",
     ]
     if platform.system() == "Windows":
-        # HACK: Windows for some reason has a bug where it interpretes the current running arch as "dotnet"
-        args = ["powershell.exe", "-ExecutionPolicy", "Unrestricted", *args, "--architecture", "x64"]
+        args = ["powershell.exe", *args]
         # args
         # -ExecutionPolicy unrestricted
     else:
