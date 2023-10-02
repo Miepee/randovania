@@ -100,14 +100,10 @@ async def download_dotnet():
     print("Executing dotnet script")
     args = [
         f"{script_path}",
-        "--architecture",
-        "x64",
         "--version",
         "latest",
         "--install-dir",
         f"{dotnet_path}",
-        "--runtime",
-        "dotnet",
     ]
     if platform.system() == "Windows":
         args = ["powershell.exe", *args]
