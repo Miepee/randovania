@@ -98,7 +98,19 @@ async def download_dotnet():
             script_path.write_bytes(script_bytes)
 
     print("Executing dotnet script")
-    args = [f"{script_path}", "--version", "latest", "--install-dir", f"{dotnet_path}", "--runtime", "dotnet"]
+    args = [
+        f"{script_path}",
+        "--architecture",
+        "x64",
+        "--version",
+        "latest",
+        "--install-dir",
+        f"{dotnet_path}",
+        "--runtime",
+        "dotnet",
+        "--architecture",
+        "x64",
+    ]
     if platform.system() == "Windows":
         # HACK: Windows for some reason has a bug where it interpretes the current running arch as "dotnet"
         args = ["powershell.exe", "-ExecutionPolicy", "Unrestricted", *args, "--architecture", "x64"]
