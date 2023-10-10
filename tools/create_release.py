@@ -98,12 +98,15 @@ async def download_dotnet():
             script_path.write_bytes(script_bytes)
 
     print("Executing dotnet script")
+    # I would like to use unix-style arguments everywhere, but sadly those aren't fully supported. PS-Style are tho.
     args = [
         f"{script_path}",
-        "--version",
+        "-Version",
         "latest",
-        "--install-dir",
+        "-InstallDir",
         f"{dotnet_path}",
+        "-Runtime",
+        "dotnet",
     ]
     if platform.system() == "Windows":
         args = ["powershell.exe", *args]
