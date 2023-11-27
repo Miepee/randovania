@@ -6,7 +6,6 @@ from randovania.exporter.hints import guaranteed_item_hint
 from randovania.game_description import default_database
 from randovania.game_description.hint import HintDarkTemple
 from randovania.games.game import RandovaniaGame
-from randovania.games.prime2.patcher import echoes_items
 
 if TYPE_CHECKING:
     from randovania.exporter.hints.hint_namer import HintNamer
@@ -32,12 +31,13 @@ def create_temple_key_hint(
     all_region_names = {}
 
     _TEMPLE_NAMES = ["Dark Agon Temple", "Dark Torvus Temple", "Hive Temple"]
+    _KEY_NAMES = ["AgonKey", "TorvusKey", "HiveKey"]
     temple_index = [HintDarkTemple.AGON_WASTES, HintDarkTemple.TORVUS_BOG, HintDarkTemple.SANCTUARY_FORTRESS].index(
         temple
     )
 
     db = default_database.resource_database_for(RandovaniaGame.METROID_PRIME_ECHOES)
-    items = [db.get_item(index) for index in echoes_items.DARK_TEMPLE_KEY_ITEMS[temple_index]]
+    items = [db.get_item(f"{_KEY_NAMES[temple_index]}{index}") for index in range(1, 4)]
 
     locations_for_items = guaranteed_item_hint.find_locations_that_gives_items(items, all_patches, player_index)
 

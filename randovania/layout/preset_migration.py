@@ -1040,9 +1040,21 @@ def _migrate_v71(preset: dict) -> dict:
 def _migrate_v72(preset: dict) -> dict:
     if preset["game"] == "prime1":
         preset["configuration"]["artifact_required"] = preset["configuration"]["artifact_target"]
-
     return preset
 
+
+def _migrate_v73(preset: dict) -> dict:
+    game_name = preset["game"]
+    if game_name != "prime2":
+        return preset
+
+    pickups = preset["configuration"]["standard_pickup_configuration"]["pickups_state"]
+
+    for key in ["Dark Agon Key", "Dark Torvus Key", "Ing Hive Key"]:
+        for i in range(1, 4):
+            pickups[f"{key} {i}"] = {"num_shuffled_pickups": 1}
+
+    return preset
 
 _MIGRATIONS = [
     _migrate_v1,  # v1.1.1-247-gaf9e4a69
@@ -1117,6 +1129,7 @@ _MIGRATIONS = [
     _migrate_v70,
     _migrate_v71,
     _migrate_v72,
+    _migrate_v73,
 ]
 CURRENT_VERSION = migration_lib.get_version(_MIGRATIONS)
 

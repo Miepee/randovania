@@ -1,5 +1,5 @@
 {
-    "schema_version": 66,
+    "schema_version": 67,
     "base_preset_uuid": null,
     "name": "Fewest Changes",
     "uuid": "bba48268-0710-4ac5-baae-dcd5fcd31d80",
@@ -143,6 +143,33 @@
                 },
                 "Energy Tank": {
                     "num_shuffled_pickups": 14
+                },
+                "Dark Agon Key 1": {
+                    "num_shuffled_pickups": 1
+                },
+                "Dark Agon Key 2": {
+                    "num_shuffled_pickups": 1
+                },
+                "Dark Agon Key 3": {
+                    "num_shuffled_pickups": 1
+                },
+                "Dark Torvus Key 1": {
+                    "num_shuffled_pickups": 1
+                },
+                "Dark Torvus Key 2": {
+                    "num_shuffled_pickups": 1
+                },
+                "Dark Torvus Key 3": {
+                    "num_shuffled_pickups": 1
+                },
+                "Ing Hive Key 1": {
+                    "num_shuffled_pickups": 1
+                },
+                "Ing Hive Key 2": {
+                    "num_shuffled_pickups": 1
+                },
+                "Ing Hive Key 3": {
+                    "num_shuffled_pickups": 1
                 }
             },
             "default_pickups": {

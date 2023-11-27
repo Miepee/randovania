@@ -26,21 +26,11 @@ def prime1_hint_text():
 
 
 def prime2_hint_text():
-    from randovania.games.prime2.generator.pickup_pool import dark_temple_keys, sky_temple_keys
+    from randovania.games.prime2.generator.pickup_pool import sky_temple_keys
 
     db = default_database.resource_database_for(RandovaniaGame.METROID_PRIME_ECHOES)
 
     result = []
-
-    for temple in range(3):
-        key = dark_temple_keys.create_dark_temple_key(0, temple, db)
-        result.append(
-            (
-                key.name.replace(" 1", "").strip(),
-                key.pickup_category,
-                key.broad_category,
-            )
-        )
 
     key = sky_temple_keys.create_sky_temple_key(0, db)
     result.append(

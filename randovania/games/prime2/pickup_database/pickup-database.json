@@ -65,6 +65,23 @@
             ],
             "hinted_as_major": true
         },
+        "temple_key": {
+            "long_name": "Dark Temple Keys",
+            "hint_details": [
+                "a ",
+                "red Temple Key"
+            ],
+            "hinted_as_major": false,
+            "is_key": true
+        },
+        "key": {
+            "long_name": "Key",
+            "hint_details": [
+                "a ",
+                "Key"
+            ],
+            "hinted_as_major": false
+        },
         "energy_tank": {
             "long_name": "Energy Tanks",
             "hint_details": [
@@ -851,6 +868,132 @@
             },
             "probability_offset": 1,
             "probability_multiplier": 2
+        },
+        "Dark Agon Key 1": {
+            "pickup_category": "temple_key",
+            "broad_category": "key",
+            "model_name": "DarkTempleKey",
+            "offworld_models": { },
+            "progression": [
+                "AgonKey1"
+            ],
+            "default_shuffled_count": 1,
+            "default_starting_count": 0,
+            "preferred_location_category": "major",
+            "additional_resources": { },
+            "hide_from_gui": true
+        },
+        "Dark Agon Key 2": {
+            "pickup_category": "temple_key",
+            "broad_category": "key",
+            "model_name": "DarkTempleKey",
+            "offworld_models": { },
+            "progression": [
+                "AgonKey2"
+            ],
+            "default_shuffled_count": 1,
+            "default_starting_count": 0,
+            "preferred_location_category": "major",
+            "additional_resources": { },
+            "hide_from_gui": true
+        },
+        "Dark Agon Key 3": {
+            "pickup_category": "temple_key",
+            "broad_category": "key",
+            "model_name": "DarkTempleKey",
+            "offworld_models": { },
+            "progression": [
+                "AgonKey3"
+            ],
+            "default_shuffled_count": 1,
+            "default_starting_count": 0,
+            "preferred_location_category": "major",
+            "additional_resources": { },
+            "hide_from_gui": true
+        },
+        "Dark Torvus Key 1": {
+            "pickup_category": "temple_key",
+            "broad_category": "key",
+            "model_name": "DarkTempleKey",
+            "offworld_models": { },
+            "progression": [
+                "TorvusKey1"
+            ],
+            "default_shuffled_count": 1,
+            "default_starting_count": 0,
+            "preferred_location_category": "major",
+            "additional_resources": { },
+            "hide_from_gui": true
+        },
+        "Dark Torvus Key 2": {
+            "pickup_category": "temple_key",
+            "broad_category": "key",
+            "model_name": "DarkTempleKey",
+            "offworld_models": { },
+            "progression": [
+                "TorvusKey2"
+            ],
+            "default_shuffled_count": 1,
+            "default_starting_count": 0,
+            "preferred_location_category": "major",
+            "additional_resources": { },
+            "hide_from_gui": true
+        },
+        "Dark Torvus Key 3": {
+            "pickup_category": "temple_key",
+            "broad_category": "key",
+            "model_name": "DarkTempleKey",
+            "offworld_models": { },
+            "progression": [
+                "TorvusKey3"
+            ],
+            "default_shuffled_count": 1,
+            "default_starting_count": 0,
+            "preferred_location_category": "major",
+            "additional_resources": { },
+            "hide_from_gui": true
+        },
+        "Ing Hive Key 1": {
+            "pickup_category": "temple_key",
+            "broad_category": "key",
+            "model_name": "DarkTempleKey",
+            "offworld_models": { },
+            "progression": [
+                "HiveKey1"
+            ],
+            "default_shuffled_count": 1,
+            "default_starting_count": 0,
+            "preferred_location_category": "major",
+            "additional_resources": { },
+            "hide_from_gui": true
+        },
+        "Ing Hive Key 2": {
+            "pickup_category": "temple_key",
+            "broad_category": "key",
+            "model_name": "DarkTempleKey",
+            "offworld_models": { },
+            "progression": [
+                "HiveKey2"
+            ],
+            "default_shuffled_count": 1,
+            "default_starting_count": 0,
+            "preferred_location_category": "major",
+            "additional_resources": { },
+            "hide_from_gui": true
+        },
+        "Ing Hive Key 3": {
+            "pickup_category": "temple_key",
+            "broad_category": "key",
+            "model_name": "DarkTempleKey",
+            "offworld_models": { },
+            "progression": [
+                "HiveKey3"
+            ],
+            "default_shuffled_count": 1,
+            "default_starting_count": 0,
+            "preferred_location_category": "major",
+            "additional_resources": { },
+            "hide_from_gui": true
         }
     },
     "ammo_pickups": {

@@ -34,7 +34,7 @@ class PresetEchoesGoal(PresetTab, Ui_PresetEchoesGoal):
 
     @classmethod
     def tab_title(cls) -> str:
-        return "Goal"
+        return "Keys"
 
     @classmethod
     def uses_patches_tab(cls) -> bool:

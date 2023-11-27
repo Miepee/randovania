@@ -1,5 +1,5 @@
 {
-    "schema_version": 66,
+    "schema_version": 67,
     "base_preset_uuid": null,
     "name": "Darkszero's Deluxe",
     "uuid": "ea1eced4-53b8-4bb3-a08f-27ac1afe6aab",
@@ -145,6 +145,33 @@
                 },
                 "Energy Tank": {
                     "num_shuffled_pickups": 14
+                },
+                "Dark Agon Key 1": {
+                    "num_shuffled_pickups": 1
+                },
+                "Dark Agon Key 2": {
+                    "num_shuffled_pickups": 1
+                },
+                "Dark Agon Key 3": {
+                    "num_shuffled_pickups": 1
+                },
+                "Dark Torvus Key 1": {
+                    "num_shuffled_pickups": 1
+                },
+                "Dark Torvus Key 2": {
+                    "num_shuffled_pickups": 1
+                },
+                "Dark Torvus Key 3": {
+                    "num_shuffled_pickups": 1
+                },
+                "Ing Hive Key 1": {
+                    "num_shuffled_pickups": 1
+                },
+                "Ing Hive Key 2": {
+                    "num_shuffled_pickups": 1
+                },
+                "Ing Hive Key 3": {
+                    "num_shuffled_pickups": 1
                 }
             },
             "default_pickups": {
