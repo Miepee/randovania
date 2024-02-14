@@ -234,3 +234,123 @@ Extra - map_name: Orange
 ----------------
 Empty Area
 Extra - map_name: Square
+----------------
+Test 1
+Extra - map_name: Square
+> Test start; Heals? False; Spawn Point
+  * Layers: default
+  > Pickup (launcher)
+      Trivial
+  > Top shaft
+      Explosive
+  > hub
+      Blue Key
+
+> Pickup (launcher); Heals? False
+  * Layers: default
+  * Pickup 7; Category? Major
+  > Test start
+      Trivial
+
+> Top shaft; Heals? False
+  * Layers: default
+  > Test start
+      Explosive
+  > Bottom Shaft
+      Trivial
+
+> Bottom Shaft; Heals? False
+  * Layers: default
+  > hub
+      Blue Key and Explosive
+  > pickup shaft 
+      Trivial
+  > pickup arachnus
+      Trivial
+
+> hub; Heals? False
+  * Layers: default
+  > Test start
+      Blue Key
+  > Bottom Shaft
+      Blue Key and Explosive
+  > Pickup hub
+      Trivial
+  > pickup hub 2
+      Trivial
+  > end
+      Blue Key and Explosive and Health
+
+> Pickup hub; Heals? False
+  * Layers: default
+  * Pickup 8; Category? Major
+  > hub
+      Trivial
+
+> pickup hub 2; Heals? False
+  * Layers: default
+  * Pickup 9; Category? Major
+  > hub
+      Trivial
+
+> pickup shaft ; Heals? False
+  * Layers: default
+  * Pickup 11; Category? Major
+  > Bottom Shaft
+      Trivial
+
+> pickup arachnus; Heals? False
+  * Layers: default
+  * Pickup 10; Category? Major
+  > Bottom Shaft
+      Trivial
+
+> boss; Heals? False
+  * Layers: default
+  * Event First Boss Killed
+  > end
+      Trivial
+
+> switch1; Heals? False
+  * Layers: default
+  * Event Key Switch 1
+  > end
+      Trivial
+
+> switch2; Heals? False
+  * Layers: default
+  * Event Key Switch 2
+  > end
+      Trivial
+
+> key; Heals? False
+  * Layers: default
+  * Pickup 12; Category? Major
+  > end
+      Trivial
+
+> end; Heals? False
+  * Layers: default
+  > hub
+      Blue Key and Explosive and Health
+  > boss
+      Trivial
+  > switch1
+      Trivial
+  > switch2
+      Trivial
+  > key
+      Trivial
+
+----------------
+Test 2
+Extra - map_name: Square
+----------------
+Test 3
+Extra - map_name: Square
+----------------
+Test 4
+Extra - map_name: Square
+----------------
+Test 5
+Extra - map_name: Square

@@ -142,8 +142,18 @@ def weighted_potential_actions(
         potential_reach = reach_lib.advance_to_with_reach_copy(player_state.reach, state)
         potential_reaches[action] = potential_reach
         base_weight = _calculate_weights_for(potential_reach, current_uncollected)
+
         actions_weights[action] = base_weight * multiplier + offset
+        debug.debug_print("Printing stuff:")
+        debug.debug_print(
+            f"action: {action} - base: {base_weight} - multiplier: {multiplier} - "
+            "offset: {offset} => total {actions_weights[action]}"
+        )
         update_for_option()
+
+    debug.debug_print("Printing action weights:")
+    for foo, bar in actions_weights.items():
+        debug.debug_print(f"{foo} - {bar}")
 
     if sum(actions_weights.values()) == 0:
         debug.debug_print("Using backup weights")
