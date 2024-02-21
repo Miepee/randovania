@@ -59,11 +59,50 @@ class FusionPatchDataFactory(PatchDataFactory):
                     }
                 )
 
+        tank_dict = {}
+        for definition, state in self.patches.configuration.ammo_pickup_configuration.pickups_state.items():
+            tank_dict[definition.extra["TankIncrementName"]] = state.ammo_count[0]
+        tank_dict["EnergyTank"] = self.configuration.energy_per_tank
+
+        starting_dict = {
+            "Energy": self.configuration.energy_per_tank - 1,
+            "Abilities": [],
+            "SecurityLevels": [],
+            "DownloadedMaps": [0, 1, 2, 3, 4, 5, 6],
+        }
+        missile_launcher = next(
+            state
+            for defi, state in self.configuration.standard_pickup_configuration.pickups_state.items()
+            if defi.name == "Missile Launcher"
+        )
+        starting_dict["Missiles"] = missile_launcher.included_ammo[0]
+        pb_launcher = next(
+            state
+            for defi, state in self.configuration.standard_pickup_configuration.pickups_state.items()
+            if defi.name == "Power Bomb Launcher"
+        )
+        starting_dict["PowerBombs"] = pb_launcher.included_ammo[0]
+
+        for item in self.patches.starting_equipment:
+            pickup_def = next(
+                value for key, value in self.pickup_db.standard_pickups.items() if value.name == item.name
+            )
+            category = pickup_def.extra["StartingItemCategory"]
+            # Special Case for E-Tanks
+            if category == "Energy":
+                starting_dict[category] += self.configuration.energy_per_tank
+                continue
+            starting_dict[category].append(pickup_def.extra["StartingItemName"])
+
         final_json = {
+            "SeedHash": self.description.shareable_hash,
             "Locations": {
                 "MajorLocations": major_pickup_list,
                 "MinorLocations": minor_pickup_list,
-            }
+            },
+            "TankIncrements": tank_dict,
+            "SkipDoorTransitions": True,  # TODO: make this available as a patch in-app
+            "StartingItems": starting_dict,
         }
         import json
 
