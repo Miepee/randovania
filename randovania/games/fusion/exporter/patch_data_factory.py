@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 from randovania.exporter import pickup_exporter
+from randovania.exporter.hints.hint_exporter import HintExporter
 from randovania.exporter.patch_data_factory import PatchDataFactory
 from randovania.game_description.assignment import PickupTarget
+from randovania.game_description.db.hint_node import HintNode
+from randovania.games.fusion.exporter.hint_namer import FusionHintNamer
 from randovania.games.game import RandovaniaGame
 from randovania.generator.pickup_pool import pickup_creator
 
@@ -94,6 +97,25 @@ class FusionPatchDataFactory(PatchDataFactory):
                 continue
             starting_dict[category].append(pickup_def.extra["StartingItemName"])
 
+        hint_json = {}
+        hint_lang_list = ["JapaneseKanji", "JapaneseHiragana", "English", "German", "French", "Italian", "Spanish"]
+        namer = FusionHintNamer(self.description.all_patches, self.players_config)
+        exporter = HintExporter(namer, self.rng, ["A joke hint."])
+
+        hints = {}
+        for node in self.game.region_list.iterate_nodes():
+            if not isinstance(node, HintNode):
+                continue
+            hints[node.extra["hint_name"]] = exporter.create_message_for_hint(
+                self.patches.hints[self.game.region_list.identifier_for_node(node)],
+                self.description.all_patches,
+                self.players_config,
+                True,  # TODO: colors
+            ).strip()
+
+        for lang in hint_lang_list:
+            hint_json[lang] = hints
+
         final_json = {
             "SeedHash": self.description.shareable_hash,
             "Locations": {
@@ -103,6 +125,7 @@ class FusionPatchDataFactory(PatchDataFactory):
             "TankIncrements": tank_dict,
             "SkipDoorTransitions": True,  # TODO: make this available as a patch in-app
             "StartingItems": starting_dict,
+            "Hints": hint_json,
         }
         import json
 
