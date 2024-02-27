@@ -110,7 +110,7 @@ class FusionPatchDataFactory(PatchDataFactory):
                 self.patches.hints[self.game.region_list.identifier_for_node(node)],
                 self.description.all_patches,
                 self.players_config,
-                True,  # TODO: colors
+                True,
             ).strip()
 
         for lang in hint_lang_list:
