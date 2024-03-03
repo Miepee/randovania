@@ -94,7 +94,7 @@
         "Charge Beam": {
             "pickup_category": "beam",
             "broad_category": "beam_related",
-            "model_name": "sItemChargeBeam",
+            "model_name": "ChargeBeam",
             "offworld_models": {
                 "prime1": "Charge Beam",
                 "prime2": "ChargeBeam INCOMPLETE",
@@ -115,7 +115,7 @@
         "Wide Beam": {
             "pickup_category": "beam",
             "broad_category": "beam_related",
-            "model_name": "sItemSpazerBeam",
+            "model_name": "WideBeam",
             "offworld_models": {
                 "prime1": "Power Beam",
                 "dread": "powerup_widebeam"
@@ -135,7 +135,7 @@
         "Plasma Beam": {
             "pickup_category": "beam",
             "broad_category": "beam_related",
-            "model_name": "sItemPlasmaBeam",
+            "model_name": "PlasmaBeam",
             "offworld_models": {
                 "prime1": "Plasma Beam",
                 "dread": "powerup_plasmabeam"
@@ -155,7 +155,7 @@
         "Wave Beam": {
             "pickup_category": "beam",
             "broad_category": "beam_related",
-            "model_name": "sItemWaveBeam",
+            "model_name": "WaveBeam",
             "offworld_models": {
                 "prime1": "Wave Beam",
                 "dread": "powerup_wavebeam"
@@ -175,7 +175,7 @@
         "Ice Beam": {
             "pickup_category": "beam",
             "broad_category": "beam_related",
-            "model_name": "sItemIceBeam",
+            "model_name": "IceBeam",
             "offworld_models": {
                 "prime1": "Ice Beam",
                 "dread": "powerup_icemissile"
@@ -194,7 +194,7 @@
         "Missile Launcher Data": {
             "pickup_category": "missile",
             "broad_category": "missile_related",
-            "model_name": "sItemMissileData",
+            "model_name": "Missiles",
             "offworld_models": {
                 "prime1": "Missile",
                 "prime2": "MissileData",
@@ -219,7 +219,7 @@
         "Super Missile Data": {
             "pickup_category": "missile",
             "broad_category": "missile_related",
-            "model_name": "sItemSMissileData",
+            "model_name": "SuperMissiles",
             "offworld_models": {
                 "prime1": "Super Missile",
                 "prime2": "SuperMissile",
@@ -240,7 +240,7 @@
         "Ice Missile Data": {
             "pickup_category": "missile",
             "broad_category": "missile_related",
-            "model_name": "sItemSMissileData",
+            "model_name": "IceMissiles",
             "offworld_models": {
                 "prime1": "Super Missile",
                 "prime2": "SuperMissile",
@@ -260,7 +260,7 @@
         "Diffusion Missile Data": {
             "pickup_category": "missile",
             "broad_category": "missile_related",
-            "model_name": "sItemSMissileData",
+            "model_name": "DiffusionMissiles",
             "offworld_models": {
                 "prime1": "Super Missile",
                 "prime2": "SuperMissile",
@@ -281,7 +281,7 @@
         "Morph Ball": {
             "pickup_category": "morph_ball",
             "broad_category": "morph_ball_related",
-            "model_name": "sItemMorphBall",
+            "model_name": "MorphBall",
             "offworld_models": {
                 "prime1": "Morph Ball",
                 "dread": "powerup_morphball"
@@ -301,7 +301,7 @@
         "Morph Ball Bomb Data": {
             "pickup_category": "morph_ball",
             "broad_category": "morph_ball_related",
-            "model_name": "sItemBomb",
+            "model_name": "Bombs",
             "offworld_models": {
                 "prime1": "Morph Ball Bomb",
                 "prime2": "MorphBallBomb",
@@ -322,7 +322,7 @@
         "Power Bomb Data": {
             "pickup_category": "morph_ball",
             "broad_category": "morph_ball_related",
-            "model_name": "sItemPBombLauncher",
+            "model_name": "PowerBombs",
             "offworld_models": {
                 "prime1": "Power Bomb",
                 "prime2": "PowerBomb",
@@ -347,7 +347,7 @@
         "Hi-Jump": {
             "pickup_category": "movement",
             "broad_category": "movement",
-            "model_name": "sItemHijump",
+            "model_name": "HiJump",
             "offworld_models": {
                 "prime1": "Space Jump Boots",
                 "prime2": "SpaceJumpBoots",
@@ -368,7 +368,7 @@
         "Space Jump": {
             "pickup_category": "movement",
             "broad_category": "movement",
-            "model_name": "sItemSpaceJump",
+            "model_name": "SpaceJump",
             "offworld_models": {
                 "prime1": "Space Jump Boots",
                 "prime2": "SpaceJumpBoots",
@@ -389,7 +389,7 @@
         "Speed Booster": {
             "pickup_category": "movement",
             "broad_category": "movement",
-            "model_name": "sItemSpeedBooster",
+            "model_name": "SpeedBooster",
             "offworld_models": {
                 "prime1": "Boost Ball",
                 "prime2": "BoostBall",
@@ -410,7 +410,7 @@
         "Screw Attack": {
             "pickup_category": "movement",
             "broad_category": "movement",
-            "model_name": "sItemScrewAttack",
+            "model_name": "ScrewAttack",
             "offworld_models": {
                 "prime2": "ScrewAttack",
                 "dread": "powerup_screwattack"
@@ -430,7 +430,7 @@
         "Varia Suit": {
             "pickup_category": "suit",
             "broad_category": "life_support",
-            "model_name": "sItemVariaSuit",
+            "model_name": "VariaSuit",
             "offworld_models": {
                 "prime1": "Varia Suit",
                 "prime2": "VariaSuit INCOMPLETE",
@@ -451,7 +451,7 @@
         "Gravity Suit": {
             "pickup_category": "suit",
             "broad_category": "life_support",
-            "model_name": "sItemGravitySuit",
+            "model_name": "GravitySuit",
             "offworld_models": {
                 "prime1": "Gravity Suit",
                 "prime2": "VariaSuit INCOMPLETE",
@@ -472,7 +472,7 @@
         "Energy Tank": {
             "pickup_category": "energy_tank",
             "broad_category": "life_support",
-            "model_name": "sItemEnergyTank",
+            "model_name": "EnergyTank",
             "offworld_models": {
                 "prime1": "Energy Tank",
                 "prime2": "EnergyTank",
@@ -491,7 +491,7 @@
         "Level 0 Locks": {
             "pickup_category": "misc",
             "broad_category": "misc",
-            "model_name": "sItemGravitySuit",
+            "model_name": "Level0",
             "offworld_models": {
                 "prime1": "Gravity Suit",
                 "prime2": "VariaSuit INCOMPLETE",
@@ -511,7 +511,7 @@
         "Level 1 Locks": {
             "pickup_category": "misc",
             "broad_category": "misc",
-            "model_name": "sItemGravitySuit",
+            "model_name": "Level1",
             "offworld_models": {
                 "prime1": "Gravity Suit",
                 "prime2": "VariaSuit INCOMPLETE",
@@ -532,7 +532,7 @@
         "Level 2 Locks": {
             "pickup_category": "misc",
             "broad_category": "misc",
-            "model_name": "sItemGravitySuit",
+            "model_name": "Level2",
             "offworld_models": {
                 "prime1": "Gravity Suit",
                 "prime2": "VariaSuit INCOMPLETE",
@@ -553,7 +553,7 @@
         "Level 3 Locks": {
             "pickup_category": "misc",
             "broad_category": "misc",
-            "model_name": "sItemGravitySuit",
+            "model_name": "Level3",
             "offworld_models": {
                 "prime1": "Gravity Suit",
                 "prime2": "VariaSuit INCOMPLETE",
@@ -574,7 +574,7 @@
         "Level 4 Locks": {
             "pickup_category": "misc",
             "broad_category": "misc",
-            "model_name": "sItemGravitySuit",
+            "model_name": "Level4",
             "offworld_models": {
                 "prime1": "Gravity Suit",
                 "prime2": "VariaSuit INCOMPLETE",
@@ -596,7 +596,7 @@
     "ammo_pickups": {
         "Missile Tank": {
             "broad_category": "missile_related",
-            "model_name": "sItemMissile",
+            "model_name": "MissileTank",
             "offworld_models": {
                 "prime1": "Missile",
                 "prime2": "MissileExpansion",
@@ -615,7 +615,7 @@
         },
         "Power Bomb Tank": {
             "broad_category": "morph_ball_related",
-            "model_name": "sItemPowerBomb",
+            "model_name": "PowerBombTank",
             "offworld_models": {
                 "prime1": "Power Bomb Expansion",
                 "prime2": "PowerBombExpansion",

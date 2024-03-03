@@ -33,7 +33,7 @@ class FusionPatchDataFactory(PatchDataFactory):
             exporter=pickup_exporter.create_pickup_exporter(
                 pickup_exporter.GenericAcquiredMemo(), self.players_config, self.game_enum()
             ),
-            visual_nothing=pickup_creator.create_visual_nothing(self.game_enum(), "Visual nothing sprite"),
+            visual_nothing=pickup_creator.create_visual_nothing(self.game_enum(), "Anonymous"),
         )
 
         minor_pickup_list = []
@@ -59,6 +59,7 @@ class FusionPatchDataFactory(PatchDataFactory):
                         "BlockX": node.extra["blockx"],
                         "BlockY": node.extra["blocky"],
                         "Item": resource,
+                        "ItemSprite": pickup.model.name,
                     }
                 )
 
