@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from randovania.exporter import pickup_exporter
+from randovania.exporter.hints import guaranteed_item_hint
 from randovania.exporter.hints.hint_exporter import HintExporter
 from randovania.exporter.patch_data_factory import PatchDataFactory
 from randovania.game_description.assignment import PickupTarget
@@ -77,13 +78,13 @@ class FusionPatchDataFactory(PatchDataFactory):
         missile_launcher = next(
             state
             for defi, state in self.configuration.standard_pickup_configuration.pickups_state.items()
-            if defi.name == "Missile Launcher"
+            if defi.name == "Missile Launcher Data"
         )
         starting_dict["Missiles"] = missile_launcher.included_ammo[0]
         pb_launcher = next(
             state
             for defi, state in self.configuration.standard_pickup_configuration.pickups_state.items()
-            if defi.name == "Power Bomb Launcher"
+            if defi.name == "Power Bomb Data"
         )
         starting_dict["PowerBombs"] = pb_launcher.included_ammo[0]
 
@@ -110,6 +111,17 @@ class FusionPatchDataFactory(PatchDataFactory):
         namer = FusionHintNamer(self.description.all_patches, self.players_config)
         exporter = HintExporter(namer, self.rng, ["A joke hint."])
 
+        artifacts = [self.game.resource_database.get_item(f"Infant Metroid {i + 1}") for i in range(20)]
+
+        metroid_hint_mapping = guaranteed_item_hint.create_guaranteed_hints_for_resources(
+            self.description.all_patches,
+            self.players_config,
+            FusionHintNamer(self.description.all_patches, self.players_config),
+            False,  # TODO: make this depending on hint settings later:tm:
+            artifacts,
+            True,
+        )
+
         hints = {}
         for node in self.game.region_list.iterate_nodes():
             if not isinstance(node, HintNode):
@@ -120,6 +132,10 @@ class FusionPatchDataFactory(PatchDataFactory):
                 self.players_config,
                 True,
             ).strip()
+            if node.extra["hint_name"] == "RestrictedLabs":
+                hints[node.extra["hint_name"]] = " ".join(
+                    [text for _, text in metroid_hint_mapping.items() if "has no need to be located" not in text]
+                )
 
         for lang in hint_lang_list:
             hint_json[lang] = hints
