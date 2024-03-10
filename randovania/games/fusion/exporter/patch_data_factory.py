@@ -20,7 +20,7 @@ class FusionPatchDataFactory(PatchDataFactory):
         db = self.game
 
         useless_target = PickupTarget(
-            pickup_creator.create_nothing_pickup(db.resource_database, "useless target sprite"),
+            pickup_creator.create_nothing_pickup(db.resource_database, "Empty"),
             self.players_config.player_index,
         )
 
@@ -89,6 +89,9 @@ class FusionPatchDataFactory(PatchDataFactory):
         starting_dict["PowerBombs"] = pb_launcher.included_ammo[0]
 
         for item in self.patches.starting_equipment:
+            if "Metroid" in item.name:
+                print("skip metroid")
+                continue
             pickup_def = next(
                 value for key, value in self.pickup_db.standard_pickups.items() if value.name == item.name
             )
@@ -146,6 +149,7 @@ class FusionPatchDataFactory(PatchDataFactory):
                 "MajorLocations": major_pickup_list,
                 "MinorLocations": minor_pickup_list,
             },
+            "RequiredMetroidCount": self.configuration.artifacts.required_artifacts,
             "TankIncrements": tank_dict,
             "SkipDoorTransitions": True,  # TODO: make this available as a patch in-app
             "StartingItems": starting_dict,
