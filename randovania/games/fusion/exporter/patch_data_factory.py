@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from randovania.exporter import pickup_exporter
+from randovania.exporter import item_names, pickup_exporter
 from randovania.exporter.hints import guaranteed_item_hint
 from randovania.exporter.hints.hint_exporter import HintExporter
 from randovania.exporter.patch_data_factory import PatchDataFactory
@@ -110,7 +110,7 @@ class FusionPatchDataFactory(PatchDataFactory):
             "Y": starting_location_node.extra["Y"],
         }
 
-        hint_json = {}
+        nav_text_json = {}
         hint_lang_list = ["JapaneseKanji", "JapaneseHiragana", "English", "German", "French", "Italian", "Spanish"]
         namer = FusionHintNamer(self.description.all_patches, self.players_config)
         exporter = HintExporter(namer, self.rng, ["A joke hint."])
@@ -141,8 +141,23 @@ class FusionPatchDataFactory(PatchDataFactory):
                     [text for _, text in metroid_hint_mapping.items() if "has no need to be located" not in text]
                 )
 
+        starting_items_list = item_names.additional_starting_equipment(
+            self.patches.configuration, self.patches.game, self.patches
+        )
+        starting_items_text = (
+            "HQ has provided you with the following starting items: " + ", ".join(starting_items_list) + ". "
+            if len(starting_items_list) > 0
+            else ""
+        )
+        metroid_location_text = "anywhere" if self.configuration.artifacts.prefer_anywhere else "at bosses"
         for lang in hint_lang_list:
-            hint_json[lang] = hints
+            nav_text_json[lang] = {
+                "NavigationTerminals": hints,
+                "ShipText": {
+                    "InitialText": f"{starting_items_text}Your objective is as follows: the [COLOR=3]SA-X[/COLOR] has discovered and destroyed a top secret [COLOR=3]Metroid[/COLOR] breeding facility. It released {self.patches.configuration.artifacts.required_artifacts} infant Metroids into the station. Initial scans indicate that they are hiding {metroid_location_text}. Find and capture {self.patches.configuration.artifacts.required_artifacts} of them, to lure out the SA-X. Then initiate the station's self-destruct sequence. Uplink at [COLOR=2]Navigation Rooms[/COLOR] along the way. I can scan the station for useful equipment from there.[OBJECTIVE]Good. Move out.",
+                    "ConfirmText": "Any Objections, Lady?",
+                },
+            }
 
         final_json = {
             "SeedHash": self.description.shareable_hash,
@@ -155,7 +170,7 @@ class FusionPatchDataFactory(PatchDataFactory):
             "SkipDoorTransitions": False,  # TODO: make this available as a patch in-app
             "StartingItems": starting_dict,
             "StartingLocation": starting_location_dict,
-            "Hints": hint_json,
+            "NavigationText": nav_text_json,
         }
         import json
 
