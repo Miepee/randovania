@@ -103,11 +103,12 @@ class FusionPatchDataFactory(PatchDataFactory):
             starting_dict[category].append(pickup_def.extra["StartingItemName"])
 
         starting_location_node = self.game.region_list.node_by_identifier(self.patches.starting_location)
-        starting_location_dict = {}
-        starting_location_dict["Area"] = self.game.region_list.nodes_to_region(starting_location_node).extra["area_id"]
-        starting_location_dict["Room"] = self.game.region_list.nodes_to_area(starting_location_node).extra["room_id"][0]
-        starting_location_dict["X"] = starting_location_node.extra["X"]
-        starting_location_dict["Y"] = starting_location_node.extra["Y"]
+        starting_location_dict = {
+            "Area": self.game.region_list.nodes_to_region(starting_location_node).extra["area_id"],
+            "Room": self.game.region_list.nodes_to_area(starting_location_node).extra["room_id"][0],
+            "X": starting_location_node.extra["X"],
+            "Y": starting_location_node.extra["Y"],
+        }
 
         hint_json = {}
         hint_lang_list = ["JapaneseKanji", "JapaneseHiragana", "English", "German", "French", "Italian", "Spanish"]
