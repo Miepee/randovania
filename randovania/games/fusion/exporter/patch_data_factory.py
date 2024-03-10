@@ -151,7 +151,7 @@ class FusionPatchDataFactory(PatchDataFactory):
             },
             "RequiredMetroidCount": self.configuration.artifacts.required_artifacts,
             "TankIncrements": tank_dict,
-            "SkipDoorTransitions": True,  # TODO: make this available as a patch in-app
+            "SkipDoorTransitions": False,  # TODO: make this available as a patch in-app
             "StartingItems": starting_dict,
             "StartingLocation": starting_location_dict,
             "Hints": hint_json,
