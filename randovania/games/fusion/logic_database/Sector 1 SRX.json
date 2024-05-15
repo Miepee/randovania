@@ -784,7 +784,7 @@
                                     {
                                         "type": "and",
                                         "data": {
-                                            "comment": "Kill with Shinespark from Yameba Corridor - https://www.youtube.com/watch?v=MIwjinIyBn4",
+                                            "comment": "Kill with Shinespark from Yameba Corridor: https://www.youtube.com/watch?v=MIwjinIyBn4",
                                             "items": [
                                                 {
                                                     "type": "resource",
@@ -869,6 +869,15 @@
                                                     "data": {
                                                         "type": "tricks",
                                                         "name": "Knowledge",
+                                                        "amount": 1,
+                                                        "negate": false
+                                                    }
+                                                },
+                                                {
+                                                    "type": "resource",
+                                                    "data": {
+                                                        "type": "items",
+                                                        "name": "L0Locks",
                                                         "amount": 1,
                                                         "negate": false
                                                     }
@@ -1386,8 +1395,16 @@
                         "Door to Sciser Puddle": {
                             "type": "and",
                             "data": {
-                                "comment": null,
-                                "items": []
+                                "comment": "TODO: double test that this is really trivial",
+                                "items": [
+                                    {
+                                        "type": "and",
+                                        "data": {
+                                            "comment": null,
+                                            "items": []
+                                        }
+                                    }
+                                ]
                             }
                         },
                         "Door to Lava Lake": {
@@ -1680,6 +1697,15 @@
                                             "amount": 1,
                                             "negate": false
                                         }
+                                    },
+                                    {
+                                        "type": "resource",
+                                        "data": {
+                                            "type": "items",
+                                            "name": "L0Locks",
+                                            "amount": 1,
+                                            "negate": false
+                                        }
                                     }
                                 ]
                             }
@@ -1767,7 +1793,7 @@
                                                 {
                                                     "type": "or",
                                                     "data": {
-                                                        "comment": null,
+                                                        "comment": "TODO: using only 1 missile should be locked behind beginner combat. trickless should have at least 3 missiles",
                                                         "items": [
                                                             {
                                                                 "type": "resource",
@@ -1801,7 +1827,7 @@
                                                 {
                                                     "type": "or",
                                                     "data": {
-                                                        "comment": "Missiles can be used to damage the Geron from the wrong side, but only by getting too close",
+                                                        "comment": "Missiles can be used to damage the Geron from the wrong side, but only by getting too close - TODO: make this cleaner.",
                                                         "items": [
                                                             {
                                                                 "type": "and",
@@ -2144,8 +2170,8 @@
                     "node_type": "event",
                     "heal": false,
                     "coordinates": {
-                        "x": 87.32,
-                        "y": 296.44,
+                        "x": 85.44555418396737,
+                        "y": 324.6300826693599,
                         "z": 0.0
                     },
                     "description": "",
@@ -2161,15 +2187,6 @@
                             "data": {
                                 "comment": null,
                                 "items": []
-                            }
-                        },
-                        "Other to Crab Rave": {
-                            "type": "resource",
-                            "data": {
-                                "type": "items",
-                                "name": "MorphBall",
-                                "amount": 1,
-                                "negate": false
                             }
                         }
                     }
@@ -2514,7 +2531,7 @@
                         "Event - Stabilizer 3 Online": {
                             "type": "or",
                             "data": {
-                                "comment": null,
+                                "comment": "You can kill this Geron with a shinespark from below, but there is currently no case where this is ever useful logically.",
                                 "items": [
                                     {
                                         "type": "template",
@@ -2876,7 +2893,7 @@
                                     {
                                         "type": "and",
                                         "data": {
-                                            "comment": "Shinespark from Screw Shaft - https://youtu.be/IP4zjb-1kP4",
+                                            "comment": "Shinespark from Screw Shaft: https://www.youtube.com/watch?v=SrshBBv-MCw",
                                             "items": [
                                                 {
                                                     "type": "resource",
@@ -2935,7 +2952,7 @@
                                                             {
                                                                 "type": "and",
                                                                 "data": {
-                                                                    "comment": "Possible without wall jumps or jump upgrades - https://youtu.be/WsY4pSmBAyo",
+                                                                    "comment": "Possible without wall jumps or jump upgrades: https://youtu.be/WsY4pSmBAyo",
                                                                     "items": [
                                                                         {
                                                                             "type": "resource",
@@ -2957,6 +2974,15 @@
                                                     "data": {
                                                         "type": "tricks",
                                                         "name": "Knowledge",
+                                                        "amount": 1,
+                                                        "negate": false
+                                                    }
+                                                },
+                                                {
+                                                    "type": "resource",
+                                                    "data": {
+                                                        "type": "items",
+                                                        "name": "L0Locks",
                                                         "amount": 1,
                                                         "negate": false
                                                     }
@@ -3002,7 +3028,7 @@
                                     {
                                         "type": "and",
                                         "data": {
-                                            "comment": null,
+                                            "comment": "Kill with Screw",
                                             "items": [
                                                 {
                                                     "type": "resource",
@@ -3036,6 +3062,27 @@
                                                                 "data": "Can Screw Single Walljump"
                                                             }
                                                         ]
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "type": "and",
+                                        "data": {
+                                            "comment": "Kill with Power Bombs",
+                                            "items": [
+                                                {
+                                                    "type": "template",
+                                                    "data": "Can Use Power Bombs"
+                                                },
+                                                {
+                                                    "type": "resource",
+                                                    "data": {
+                                                        "type": "tricks",
+                                                        "name": "Knowledge",
+                                                        "amount": 1,
+                                                        "negate": false
                                                     }
                                                 }
                                             ]
@@ -3184,12 +3231,12 @@
                                                 {
                                                     "type": "and",
                                                     "data": {
-                                                        "comment": null,
+                                                        "comment": "Get up by freezing pirates",
                                                         "items": [
                                                             {
                                                                 "type": "or",
                                                                 "data": {
-                                                                    "comment": "Wall Jump reqs",
+                                                                    "comment": "Wall Jump reqs - TODO: rethink this connection again. the walljumps are confusing",
                                                                     "items": [
                                                                         {
                                                                             "type": "and",
@@ -3295,12 +3342,12 @@
                                                             {
                                                                 "type": "or",
                                                                 "data": {
-                                                                    "comment": "Ice req",
+                                                                    "comment": "Freeze requirements",
                                                                     "items": [
                                                                         {
                                                                             "type": "and",
                                                                             "data": {
-                                                                                "comment": null,
+                                                                                "comment": "Freeze with Ice Beam/Missiles: https://youtu.be/6ha7hZ0iW1I",
                                                                                 "items": [
                                                                                     {
                                                                                         "type": "resource",
@@ -3314,7 +3361,7 @@
                                                                                     {
                                                                                         "type": "or",
                                                                                         "data": {
-                                                                                            "comment": "https://youtu.be/6ha7hZ0iW1I",
+                                                                                            "comment": null,
                                                                                             "items": [
                                                                                                 {
                                                                                                     "type": "resource",
@@ -3360,7 +3407,7 @@
                                                                         {
                                                                             "type": "and",
                                                                             "data": {
-                                                                                "comment": "https://youtu.be/o91JwaZoFTg",
+                                                                                "comment": "Freeze with Diffusion: https://youtu.be/o91JwaZoFTg",
                                                                                 "items": [
                                                                                     {
                                                                                         "type": "resource",
@@ -3673,7 +3720,7 @@
                                     {
                                         "type": "and",
                                         "data": {
-                                            "comment": "Ledge Grab jump without Screw Attack gives best result",
+                                            "comment": "Damage Run through lava with Ledge Grab jump without Screw Attack",
                                             "items": [
                                                 {
                                                     "type": "resource",
@@ -3794,7 +3841,7 @@
                                     {
                                         "type": "or",
                                         "data": {
-                                            "comment": "Going to the bottom of the lava and climbing up due to missing the platform",
+                                            "comment": "Damage run by going to the bottom of the lava and climbing up due to missing the platform",
                                             "items": [
                                                 {
                                                     "type": "and",
@@ -4403,7 +4450,7 @@
                                     {
                                         "type": "and",
                                         "data": {
-                                            "comment": "Shinespark across from Moto Motorway - https://www.youtube.com/watch?v=HyXBjdbLfDs",
+                                            "comment": "Shinespark across from Moto Motorway: https://www.youtube.com/watch?v=HyXBjdbLfDs",
                                             "items": [
                                                 {
                                                     "type": "resource",
@@ -4437,6 +4484,15 @@
                                                     "data": {
                                                         "type": "tricks",
                                                         "name": "ShinesparkTrick",
+                                                        "amount": 1,
+                                                        "negate": false
+                                                    }
+                                                },
+                                                {
+                                                    "type": "resource",
+                                                    "data": {
+                                                        "type": "items",
+                                                        "name": "L0Locks",
                                                         "amount": 1,
                                                         "negate": false
                                                     }
@@ -5715,7 +5771,7 @@
                         "y": 40.0,
                         "z": 0.0
                     },
-                    "description": "",
+                    "description": "TODO: event for shot blocks",
                     "layers": [
                         "default"
                     ],
@@ -6542,7 +6598,7 @@
                         "Door to Ridley Arena": {
                             "type": "and",
                             "data": {
-                                "comment": null,
+                                "comment": "TODO: combat to deal with rippers without getting hit",
                                 "items": [
                                     {
                                         "type": "template",
@@ -6625,7 +6681,7 @@
                         "Door to Tourian Hub West": {
                             "type": "or",
                             "data": {
-                                "comment": null,
+                                "comment": "TODO: combat to deal with rippers without getting hit",
                                 "items": [
                                     {
                                         "type": "resource",
@@ -6796,7 +6852,7 @@
                                                 {
                                                     "type": "and",
                                                     "data": {
-                                                        "comment": "Can leave with single wall jumping, but currently this is never in logic - https://youtu.be/trYxYGq7PMs",
+                                                        "comment": "SWJ: https://youtu.be/trYxYGq7PMs",
                                                         "items": [
                                                             {
                                                                 "type": "template",
@@ -6865,7 +6921,7 @@
                                                             {
                                                                 "type": "or",
                                                                 "data": {
-                                                                    "comment": null,
+                                                                    "comment": "TODO: revise beam requirements?",
                                                                     "items": [
                                                                         {
                                                                             "type": "and",
@@ -7517,7 +7573,7 @@
                                     {
                                         "type": "or",
                                         "data": {
-                                            "comment": null,
+                                            "comment": "TODO: these requirements dont seem quite right",
                                             "items": [
                                                 {
                                                     "type": "resource",
@@ -7722,7 +7778,7 @@
                                                 {
                                                     "type": "and",
                                                     "data": {
-                                                        "comment": "Diagonal Missile shot at the third Missile Block when standing close to the wall can hit it (may not even have to freeze the enemy)",
+                                                        "comment": "Diagonal Missile shot at the third Missile Block when standing close to the wall can hit it (may not even have to freeze the enemy) - TODO: videos and more/different combinations",
                                                         "items": [
                                                             {
                                                                 "type": "resource",
@@ -7776,7 +7832,7 @@
                         "Door to Ripper Maze Access": {
                             "type": "or",
                             "data": {
-                                "comment": null,
+                                "comment": "TODO: these requirements aren't quite right. I think. Doing this damageless should be more involved",
                                 "items": [
                                     {
                                         "type": "template",
@@ -8017,7 +8073,7 @@
                                     {
                                         "type": "and",
                                         "data": {
-                                            "comment": "Shinespark from Moto Motorway - https://youtu.be/uppVC5hM3t0",
+                                            "comment": "Shinespark from Moto Motorway: https://www.youtube.com/watch?v=I9YH_s989sQ",
                                             "items": [
                                                 {
                                                     "type": "resource",
@@ -8102,6 +8158,15 @@
                                                     "data": {
                                                         "type": "tricks",
                                                         "name": "Knowledge",
+                                                        "amount": 1,
+                                                        "negate": false
+                                                    }
+                                                },
+                                                {
+                                                    "type": "resource",
+                                                    "data": {
+                                                        "type": "items",
+                                                        "name": "L0Locks",
                                                         "amount": 1,
                                                         "negate": false
                                                     }
@@ -8571,8 +8636,8 @@
                     "node_type": "event",
                     "heal": false,
                     "coordinates": {
-                        "x": 247.29,
-                        "y": 87.6,
+                        "x": 239.04820419463724,
+                        "y": 73.18380298605581,
                         "z": 0.0
                     },
                     "description": "",
@@ -8588,27 +8653,6 @@
                             "data": {
                                 "comment": null,
                                 "items": []
-                            }
-                        },
-                        "Other to Wall Jump Tutorial": {
-                            "type": "or",
-                            "data": {
-                                "comment": null,
-                                "items": [
-                                    {
-                                        "type": "template",
-                                        "data": "Can Bounce in Ball"
-                                    },
-                                    {
-                                        "type": "resource",
-                                        "data": {
-                                            "type": "tricks",
-                                            "name": "MidAirMorph",
-                                            "amount": 1,
-                                            "negate": false
-                                        }
-                                    }
-                                ]
                             }
                         }
                     }
@@ -8698,7 +8742,7 @@
                         "Door to Checkpoint Intersection": {
                             "type": "or",
                             "data": {
-                                "comment": "Deal with the Pirates",
+                                "comment": "Deal with the Pirates - TODO: damage boost",
                                 "items": [
                                     {
                                         "type": "resource",
@@ -8809,6 +8853,15 @@
                                                         "amount": 1,
                                                         "negate": true
                                                     }
+                                                },
+                                                {
+                                                    "type": "resource",
+                                                    "data": {
+                                                        "type": "items",
+                                                        "name": "L0Locks",
+                                                        "amount": 1,
+                                                        "negate": false
+                                                    }
                                                 }
                                             ]
                                         }
@@ -8886,7 +8939,7 @@
                                     {
                                         "type": "or",
                                         "data": {
-                                            "comment": "Get past Rippers - TODO: health for damage runs",
+                                            "comment": "Get past Rippers - TODO: health for damage runs. Freezing damageles should probably be bumped",
                                             "items": [
                                                 {
                                                     "type": "resource",
@@ -8931,8 +8984,42 @@
                                         }
                                     },
                                     {
-                                        "type": "template",
-                                        "data": "Can Bounce in Ball"
+                                        "type": "or",
+                                        "data": {
+                                            "comment": "Get into tunnel",
+                                            "items": [
+                                                {
+                                                    "type": "template",
+                                                    "data": "Can Bounce in Ball"
+                                                },
+                                                {
+                                                    "type": "and",
+                                                    "data": {
+                                                        "comment": null,
+                                                        "items": [
+                                                            {
+                                                                "type": "resource",
+                                                                "data": {
+                                                                    "type": "items",
+                                                                    "name": "MorphBall",
+                                                                    "amount": 1,
+                                                                    "negate": false
+                                                                }
+                                                            },
+                                                            {
+                                                                "type": "resource",
+                                                                "data": {
+                                                                    "type": "tricks",
+                                                                    "name": "MidAirMorph",
+                                                                    "amount": 3,
+                                                                    "negate": false
+                                                                }
+                                                            }
+                                                        ]
+                                                    }
+                                                }
+                                            ]
+                                        }
                                     }
                                 ]
                             }
@@ -9005,7 +9092,7 @@
                                     {
                                         "type": "or",
                                         "data": {
-                                            "comment": "Get past Rippers - TODO: health for damage runs",
+                                            "comment": "Get past Rippers - TODO: health for damage runs. Also freezing damageless should be bumped",
                                             "items": [
                                                 {
                                                     "type": "resource",
@@ -9161,7 +9248,7 @@
                                 "items": [
                                     {
                                         "type": "template",
-                                        "data": "Can Use Any Bombs"
+                                        "data": "Can Break Single Bomb Blocks"
                                     },
                                     {
                                         "type": "and",
@@ -9223,6 +9310,15 @@
                                                             }
                                                         ]
                                                     }
+                                                },
+                                                {
+                                                    "type": "resource",
+                                                    "data": {
+                                                        "type": "items",
+                                                        "name": "L0Locks",
+                                                        "amount": 1,
+                                                        "negate": false
+                                                    }
                                                 }
                                             ]
                                         }
@@ -9280,7 +9376,7 @@
                         "y": 96.0,
                         "z": 0.0
                     },
-                    "description": "",
+                    "description": "TODO: make bomb blocks an event",
                     "layers": [
                         "default"
                     ],
@@ -9971,6 +10067,15 @@
                                                             }
                                                         ]
                                                     }
+                                                },
+                                                {
+                                                    "type": "resource",
+                                                    "data": {
+                                                        "type": "items",
+                                                        "name": "L0Locks",
+                                                        "amount": 1,
+                                                        "negate": false
+                                                    }
                                                 }
                                             ]
                                         }
@@ -10049,6 +10154,15 @@
                                                             }
                                                         ]
                                                     }
+                                                },
+                                                {
+                                                    "type": "resource",
+                                                    "data": {
+                                                        "type": "items",
+                                                        "name": "L0Locks",
+                                                        "amount": 1,
+                                                        "negate": false
+                                                    }
                                                 }
                                             ]
                                         }
@@ -10093,7 +10207,7 @@
                         "Event - Charge Core-X": {
                             "type": "and",
                             "data": {
-                                "comment": null,
+                                "comment": "TODO: you should not need to farm missiles on the boss in trickless",
                                 "items": [
                                     {
                                         "type": "resource",
@@ -10778,7 +10892,7 @@
                         "Pickup (Hidden Power Bomb Tank)": {
                             "type": "and",
                             "data": {
-                                "comment": null,
+                                "comment": "TODO: needs the bomb blocks gone",
                                 "items": [
                                     {
                                         "type": "resource",
