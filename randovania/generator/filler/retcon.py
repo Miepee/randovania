@@ -45,10 +45,10 @@ def _calculate_uncollected_index_weights(
     result = {}
 
     for indices in indices_groups:
-        weight_from_collected_indices = math.sqrt(len(indices) / ((1 + len(assigned_indices & indices)) ** 2))
-
+        weight_from_collected_indices = math.sqrt((len(indices) / 2) / ((1 + len(assigned_indices & indices)) ** 1.6))
         for index in sorted(uncollected_indices & indices):
-            weight_from_considered_count = min(10, considered_counts[index] + 1) ** -2
+            weight_from_considered_count = min(20, considered_counts[index] + 1) ** -1.5
+
             result[index] = weight_from_collected_indices * weight_from_considered_count
             # print(f"## {index} : {weight_from_collected_indices} ___ {weight_from_considered_count}")
 
