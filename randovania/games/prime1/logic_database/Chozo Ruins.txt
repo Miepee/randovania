@@ -1760,18 +1760,6 @@ Watery Hall
 Extra - asset_id: 1227669322
 Extra - size_index: 0.6
 Extra - aabb: [397.9558, -8.934963, 4.7323303, 483.05167, 117.17189, 59.302334]
-> Door to Dynamo Access; Heals? False
-  * Layers: default
-  * Missile Blast Shield to Dynamo Access/Door to Watery Hall
-  * Extra - dock_index: 0
-  * Extra - nonstandard: False
-  > Behind Gate
-      All of the following:
-          Morph Ball
-          Any of the following:
-              Morph Ball Bomb
-              Power Bomb and Knowledge (Beginner)
-
 > Door to Watery Hall Access; Heals? False; Spawn Point; Default Node
   * Layers: default
   * Normal Door to Watery Hall Access/Door to Watery Hall
@@ -1825,19 +1813,6 @@ Extra - aabb: [397.9558, -8.934963, 4.7323303, 483.05167, 117.17189, 59.302334]
 
 > Behind Gate; Heals? False
   * Layers: default
-  > Door to Dynamo Access
-      All of the following:
-          Morph Ball
-          Any of the following:
-              Morph Ball Bomb
-              Power Bomb and Knowledge (Beginner)
-              All of the following:
-                  # https://youtu.be/bh18bp4makg
-                  Boost Ball and Clip Through Objects (Expert) and Single Room Out of Bounds (Advanced) and Standable Terrain (Advanced)
-                  Any of the following:
-                      Space Jump Boots
-                      # https://www.youtube.com/watch?v=LdBFCaOFDE4
-                      Movement (Expert)
   > Door to Watery Hall Access
       Any of the following:
           After Watery Hall Gate
@@ -1876,26 +1851,19 @@ Dynamo Access
 Extra - asset_id: 255867655
 Extra - size_index: 0.1
 Extra - aabb: [440.1556, -52.556156, 25.076607, 469.9012, -8.934963, 31.751318]
-> Door to Watery Hall; Heals? False
-  * Layers: default
-  * Normal Door to Watery Hall/Door to Dynamo Access
-  * Extra - dock_index: 0
-  * Extra - nonstandard: False
-  > Door to Dynamo
-      Trivial
-
 > Door to Dynamo; Heals? False; Spawn Point; Default Node
   * Layers: default
   * Missile Blast Shield to Dynamo/Door to Dynamo Access
   * Extra - dock_index: 1
   * Extra - nonstandard: False
-  > Door to Watery Hall
+  > Center
       Trivial
 
-> Pickup (Items Every Room); Heals? False
-  * Layers: items_every_room
-  * Pickup 126; Category? Minor
+> Center; Heals? False
+  * Layers: default
   * Extra - position_required: True
+  > Door to Dynamo
+      Trivial
 
 ----------------
 Energy Core
@@ -1951,8 +1919,8 @@ Extra - aabb: [452.1565, -77.24089, 22.542633, 479.4419, -51.883865, 63.929382]
   * Normal Door to Dynamo Access/Door to Dynamo
   * Extra - dock_index: 0
   * Extra - nonstandard: False
-  > Pickup (Missile Expansion)
-      Missile and Shoot Any Beam
+  > Event - Credits
+      Trivial
   > Pickup (Missile Expansion 2)
       All of the following:
           Morph Ball and Spider Ball
@@ -1960,9 +1928,9 @@ Extra - aabb: [452.1565, -77.24089, 22.542633, 479.4419, -51.883865, 63.929382]
               Space Jump Boots or Standable Terrain (Beginner)
               Morph Ball Bomb and Bomb Jump (Beginner)
 
-> Pickup (Missile Expansion); Heals? False
+> Event - Credits; Heals? False
   * Layers: default
-  * Pickup 25; Category? Minor
+  * Event Credits
   * Extra - position_required: False
   > Door to Dynamo Access
       Trivial

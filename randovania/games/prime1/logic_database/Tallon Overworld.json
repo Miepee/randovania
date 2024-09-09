@@ -1261,45 +1261,6 @@
                         }
                     }
                 },
-                "Door to Transport Tunnel A": {
-                    "node_type": "dock",
-                    "heal": false,
-                    "coordinates": {
-                        "x": -21.294198989868164,
-                        "y": 50.39111518859863,
-                        "z": -12.615567207336426
-                    },
-                    "description": "",
-                    "layers": [
-                        "default"
-                    ],
-                    "extra": {
-                        "dock_index": 1,
-                        "nonstandard": false
-                    },
-                    "valid_starting_location": false,
-                    "dock_type": "door",
-                    "default_connection": {
-                        "region": "Tallon Overworld",
-                        "area": "Transport Tunnel A",
-                        "node": "Door to Tallon Canyon"
-                    },
-                    "default_dock_weakness": "Normal Door",
-                    "exclude_from_dock_rando": false,
-                    "incompatible_dock_weaknesses": [],
-                    "override_default_open_requirement": null,
-                    "override_default_lock_requirement": null,
-                    "ui_custom_name": null,
-                    "connections": {
-                        "Half Pipe": {
-                            "type": "and",
-                            "data": {
-                                "comment": null,
-                                "items": []
-                            }
-                        }
-                    }
-                },
                 "Door to Gully": {
                     "node_type": "dock",
                     "heal": false,
@@ -1426,13 +1387,6 @@
                     "valid_starting_location": false,
                     "connections": {
                         "Door to Canyon Cavern": {
-                            "type": "and",
-                            "data": {
-                                "comment": null,
-                                "items": []
-                            }
-                        },
-                        "Door to Transport Tunnel A": {
                             "type": "and",
                             "data": {
                                 "comment": null,
@@ -2467,7 +2421,7 @@
                         "dock_index": 0,
                         "nonstandard": false
                     },
-                    "valid_starting_location": true,
+                    "valid_starting_location": false,
                     "dock_type": "door",
                     "default_connection": {
                         "region": "Tallon Overworld",
@@ -2481,7 +2435,7 @@
                     "override_default_lock_requirement": null,
                     "ui_custom_name": null,
                     "connections": {
-                        "Door to Tallon Canyon": {
+                        "Start": {
                             "type": "and",
                             "data": {
                                 "comment": null,
@@ -2490,35 +2444,18 @@
                         }
                     }
                 },
-                "Door to Tallon Canyon": {
-                    "node_type": "dock",
+                "Start": {
+                    "node_type": "generic",
                     "heal": false,
-                    "coordinates": {
-                        "x": -2.4877558876760304,
-                        "y": -25.723651885986328,
-                        "z": 2.5000014768371557
-                    },
+                    "coordinates": null,
                     "description": "",
                     "layers": [
                         "default"
                     ],
                     "extra": {
-                        "dock_index": 1,
-                        "nonstandard": false
+                        "position_required": true
                     },
-                    "valid_starting_location": false,
-                    "dock_type": "door",
-                    "default_connection": {
-                        "region": "Tallon Overworld",
-                        "area": "Tallon Canyon",
-                        "node": "Door to Transport Tunnel A"
-                    },
-                    "default_dock_weakness": "Normal Door",
-                    "exclude_from_dock_rando": false,
-                    "incompatible_dock_weaknesses": [],
-                    "override_default_open_requirement": null,
-                    "override_default_lock_requirement": null,
-                    "ui_custom_name": null,
+                    "valid_starting_location": true,
                     "connections": {
                         "Door to Transport to Chozo Ruins West": {
                             "type": "and",
@@ -2528,22 +2465,6 @@
                             }
                         }
                     }
-                },
-                "Pickup (Items Every Room)": {
-                    "node_type": "pickup",
-                    "heal": false,
-                    "coordinates": null,
-                    "description": "",
-                    "layers": [
-                        "items_every_room"
-                    ],
-                    "extra": {
-                        "position_required": true
-                    },
-                    "valid_starting_location": false,
-                    "pickup_index": 269,
-                    "location_category": "minor",
-                    "connections": {}
                 }
             }
         },

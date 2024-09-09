@@ -229,14 +229,6 @@ Extra - aabb: [-579.22754, 296.85858, -35.60154, -454.3111, 409.0403, 42.921246]
   > Half Pipe
       Trivial
 
-> Door to Transport Tunnel A; Heals? False
-  * Layers: default
-  * Normal Door to Transport Tunnel A/Door to Tallon Canyon
-  * Extra - dock_index: 1
-  * Extra - nonstandard: False
-  > Half Pipe
-      Trivial
-
 > Door to Gully; Heals? False
   * Layers: default
   * Normal Door to Gully/Door to Tallon Canyon
@@ -256,8 +248,6 @@ Extra - aabb: [-579.22754, 296.85858, -35.60154, -454.3111, 409.0403, 42.921246]
 > Half Pipe; Heals? False
   * Layers: default
   > Door to Canyon Cavern
-      Trivial
-  > Door to Transport Tunnel A
       Trivial
   > Door to Gully
       Morph Ball Bomb and Boost Ball and Morph Ball
@@ -382,26 +372,19 @@ Transport Tunnel A
 Extra - asset_id: 333016381
 Extra - size_index: 0.1
 Extra - aabb: [-541.33105, 408.5441, -24.012718, -524.31665, 460.01, -12.694022]
-> Door to Transport to Chozo Ruins West; Heals? False; Spawn Point; Default Node
+> Door to Transport to Chozo Ruins West; Heals? False; Default Node
   * Layers: default
   * Normal Door to Transport to Chozo Ruins West/Door to Transport Tunnel A
   * Extra - dock_index: 0
   * Extra - nonstandard: False
-  > Door to Tallon Canyon
+  > Start
       Trivial
 
-> Door to Tallon Canyon; Heals? False
+> Start; Heals? False; Spawn Point
   * Layers: default
-  * Normal Door to Tallon Canyon/Door to Transport Tunnel A
-  * Extra - dock_index: 1
-  * Extra - nonstandard: False
+  * Extra - position_required: True
   > Door to Transport to Chozo Ruins West
       Trivial
-
-> Pickup (Items Every Room); Heals? False
-  * Layers: items_every_room
-  * Pickup 269; Category? Minor
-  * Extra - position_required: True
 
 ----------------
 Root Tunnel
