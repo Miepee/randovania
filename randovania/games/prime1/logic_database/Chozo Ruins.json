@@ -74,7 +74,7 @@
                     "dock_type": "teleporter",
                     "default_connection": {
                         "region": "Tallon Overworld",
-                        "area": "Transport to Chozo Ruins West",
+                        "area": "Beta",
                         "node": "Teleporter to Chozo Ruins"
                     },
                     "default_dock_weakness": "Teleporter",
@@ -11533,8 +11533,8 @@
                 }
             }
         },
-        "Dynamo Access": {
-            "default_node": "Door to Dynamo",
+        "Delta": {
+            "default_node": "Door to Gamma",
             "extra": {
                 "asset_id": 255867655,
                 "size_index": 0.1,
@@ -11548,7 +11548,7 @@
                 ]
             },
             "nodes": {
-                "Door to Dynamo": {
+                "Door to Gamma": {
                     "node_type": "dock",
                     "heal": false,
                     "coordinates": {
@@ -11568,8 +11568,8 @@
                     "dock_type": "door",
                     "default_connection": {
                         "region": "Chozo Ruins",
-                        "area": "Dynamo",
-                        "node": "Door to Dynamo Access"
+                        "area": "Gamma",
+                        "node": "Door to Delta"
                     },
                     "default_dock_weakness": "Missile Blast Shield",
                     "exclude_from_dock_rando": false,
@@ -11600,7 +11600,7 @@
                     },
                     "valid_starting_location": false,
                     "connections": {
-                        "Door to Dynamo": {
+                        "Door to Gamma": {
                             "type": "and",
                             "data": {
                                 "comment": null,
@@ -11821,8 +11821,8 @@
                 }
             }
         },
-        "Dynamo": {
-            "default_node": "Door to Dynamo Access",
+        "Gamma": {
+            "default_node": "Door to Delta",
             "extra": {
                 "asset_id": 81183365,
                 "size_index": 0.3,
@@ -11836,7 +11836,7 @@
                 ]
             },
             "nodes": {
-                "Door to Dynamo Access": {
+                "Door to Delta": {
                     "node_type": "dock",
                     "heal": false,
                     "coordinates": {
@@ -11856,8 +11856,8 @@
                     "dock_type": "door",
                     "default_connection": {
                         "region": "Chozo Ruins",
-                        "area": "Dynamo Access",
-                        "node": "Door to Dynamo"
+                        "area": "Delta",
+                        "node": "Door to Gamma"
                     },
                     "default_dock_weakness": "Normal Door",
                     "exclude_from_dock_rando": false,
@@ -11967,7 +11967,7 @@
                     "valid_starting_location": false,
                     "event_name": "Event43",
                     "connections": {
-                        "Door to Dynamo Access": {
+                        "Door to Delta": {
                             "type": "and",
                             "data": {
                                 "comment": null,
@@ -11989,7 +11989,7 @@
                     "pickup_index": 26,
                     "location_category": "minor",
                     "connections": {
-                        "Door to Dynamo Access": {
+                        "Door to Delta": {
                             "type": "and",
                             "data": {
                                 "comment": null,

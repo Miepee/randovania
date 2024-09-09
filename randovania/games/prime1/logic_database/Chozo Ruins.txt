@@ -13,7 +13,7 @@ Extra - aabb: [72.24433, -170.26108, -22.289257, 104.584404, -130.01154, 44.1597
 
 > Teleporter to Tallon Overworld; Heals? False; Spawn Point; Default Node
   * Layers: default
-  * Teleporter to Transport to Chozo Ruins West/Teleporter to Chozo Ruins; Custom name: Main Plaza Elevator
+  * Teleporter to Beta/Teleporter to Chozo Ruins; Custom name: Main Plaza Elevator
   * Extra - scan_asset_id: 1013969958
   * Extra - teleporter_instance_id: 125
   > Door to Ruins Entrance
@@ -1847,13 +1847,13 @@ Extra - aabb: [465.76572, -165.04358, 39.71502, 512.29474, -136.61432, 50.46308]
   * Extra - position_required: True
 
 ----------------
-Dynamo Access
+Delta
 Extra - asset_id: 255867655
 Extra - size_index: 0.1
 Extra - aabb: [440.1556, -52.556156, 25.076607, 469.9012, -8.934963, 31.751318]
-> Door to Dynamo; Heals? False; Spawn Point; Default Node
+> Door to Gamma; Heals? False; Spawn Point; Default Node
   * Layers: default
-  * Missile Blast Shield to Dynamo/Door to Dynamo Access
+  * Missile Blast Shield to Gamma/Door to Delta
   * Extra - dock_index: 1
   * Extra - nonstandard: False
   > Center
@@ -1862,7 +1862,7 @@ Extra - aabb: [440.1556, -52.556156, 25.076607, 469.9012, -8.934963, 31.751318]
 > Center; Heals? False
   * Layers: default
   * Extra - position_required: True
-  > Door to Dynamo
+  > Door to Gamma
       Trivial
 
 ----------------
@@ -1910,13 +1910,13 @@ Extra - aabb: [510.0157, -208.54495, 27.964539, 590.7108, -99.84121, 65.02376]
   * Extra - position_required: True
 
 ----------------
-Dynamo
+Gamma
 Extra - asset_id: 81183365
 Extra - size_index: 0.3
 Extra - aabb: [452.1565, -77.24089, 22.542633, 479.4419, -51.883865, 63.929382]
-> Door to Dynamo Access; Heals? False; Spawn Point; Default Node
+> Door to Delta; Heals? False; Spawn Point; Default Node
   * Layers: default
-  * Normal Door to Dynamo Access/Door to Dynamo
+  * Normal Door to Delta/Door to Gamma
   * Extra - dock_index: 0
   * Extra - nonstandard: False
   > Event - Credits
@@ -1932,13 +1932,13 @@ Extra - aabb: [452.1565, -77.24089, 22.542633, 479.4419, -51.883865, 63.929382]
   * Layers: default
   * Event Credits
   * Extra - position_required: False
-  > Door to Dynamo Access
+  > Door to Delta
       Trivial
 
 > Pickup (Missile Expansion 2); Heals? False
   * Layers: default
   * Pickup 26; Category? Minor
-  > Door to Dynamo Access
+  > Door to Delta
       Trivial
 
 ----------------

@@ -368,13 +368,13 @@ Extra - aabb: [-286.18207, 307.2683, -70.64886, 66.35881, 622.5101, 151.42361]
       Trivial
 
 ----------------
-Transport Tunnel A
+Alpha
 Extra - asset_id: 333016381
 Extra - size_index: 0.1
 Extra - aabb: [-541.33105, 408.5441, -24.012718, -524.31665, 460.01, -12.694022]
-> Door to Transport to Chozo Ruins West; Heals? False; Default Node
+> Door to Beta; Heals? False; Default Node
   * Layers: default
-  * Normal Door to Transport to Chozo Ruins West/Door to Transport Tunnel A
+  * Normal Door to Beta/Door to Alpha
   * Extra - dock_index: 0
   * Extra - nonstandard: False
   > Start
@@ -383,7 +383,7 @@ Extra - aabb: [-541.33105, 408.5441, -24.012718, -524.31665, 460.01, -12.694022]
 > Start; Heals? False; Spawn Point
   * Layers: default
   * Extra - position_required: True
-  > Door to Transport to Chozo Ruins West
+  > Door to Beta
       Trivial
 
 ----------------
@@ -495,13 +495,13 @@ Extra - aabb: [-115.51967, 559.7366, -6.924032, -100.41126, 611.17053, 7.0221796
       Morph Ball
 
 ----------------
-Transport to Chozo Ruins West
+Beta
 Extra - asset_id: 295707720
 Extra - size_index: 0.3
 Extra - aabb: [-546.1809, 459.98227, -26.809874, -510.0558, 505.7005, 24.461393]
-> Door to Transport Tunnel A; Heals? False
+> Door to Alpha; Heals? False
   * Layers: default
-  * Normal Door to Transport Tunnel A/Door to Transport to Chozo Ruins West
+  * Normal Door to Alpha/Door to Beta
   * Extra - dock_index: 0
   * Extra - nonstandard: False
   > Teleporter to Chozo Ruins
@@ -509,10 +509,10 @@ Extra - aabb: [-546.1809, 459.98227, -26.809874, -510.0558, 505.7005, 24.461393]
 
 > Teleporter to Chozo Ruins; Heals? False; Spawn Point; Default Node
   * Layers: default
-  * Teleporter to Transport to Tallon Overworld North/Teleporter to Tallon Overworld; Custom name: Tallon Canyon Elevator
+  * Teleporter to Transport to Tallon Overworld North/Teleporter to Tallon Overworld; Custom name: Beta Elevator
   * Extra - scan_asset_id: 1940403179
   * Extra - teleporter_instance_id: 917509
-  > Door to Transport Tunnel A
+  > Door to Alpha
       Trivial
 
 > Pickup (Items Every Room); Heals? False

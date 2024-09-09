@@ -2390,8 +2390,8 @@
                 }
             }
         },
-        "Transport Tunnel A": {
-            "default_node": "Door to Transport to Chozo Ruins West",
+        "Alpha": {
+            "default_node": "Door to Beta",
             "extra": {
                 "asset_id": 333016381,
                 "size_index": 0.1,
@@ -2405,7 +2405,7 @@
                 ]
             },
             "nodes": {
-                "Door to Transport to Chozo Ruins West": {
+                "Door to Beta": {
                     "node_type": "dock",
                     "heal": false,
                     "coordinates": {
@@ -2425,8 +2425,8 @@
                     "dock_type": "door",
                     "default_connection": {
                         "region": "Tallon Overworld",
-                        "area": "Transport to Chozo Ruins West",
-                        "node": "Door to Transport Tunnel A"
+                        "area": "Beta",
+                        "node": "Door to Alpha"
                     },
                     "default_dock_weakness": "Normal Door",
                     "exclude_from_dock_rando": false,
@@ -2457,7 +2457,7 @@
                     },
                     "valid_starting_location": true,
                     "connections": {
-                        "Door to Transport to Chozo Ruins West": {
+                        "Door to Beta": {
                             "type": "and",
                             "data": {
                                 "comment": null,
@@ -2967,7 +2967,7 @@
                 }
             }
         },
-        "Transport to Chozo Ruins West": {
+        "Beta": {
             "default_node": "Teleporter to Chozo Ruins",
             "extra": {
                 "asset_id": 295707720,
@@ -2982,7 +2982,7 @@
                 ]
             },
             "nodes": {
-                "Door to Transport Tunnel A": {
+                "Door to Alpha": {
                     "node_type": "dock",
                     "heal": false,
                     "coordinates": {
@@ -3002,8 +3002,8 @@
                     "dock_type": "door",
                     "default_connection": {
                         "region": "Tallon Overworld",
-                        "area": "Transport Tunnel A",
-                        "node": "Door to Transport to Chozo Ruins West"
+                        "area": "Alpha",
+                        "node": "Door to Beta"
                     },
                     "default_dock_weakness": "Normal Door",
                     "exclude_from_dock_rando": false,
@@ -3045,9 +3045,9 @@
                     "incompatible_dock_weaknesses": [],
                     "override_default_open_requirement": null,
                     "override_default_lock_requirement": null,
-                    "ui_custom_name": "Tallon Canyon Elevator",
+                    "ui_custom_name": "Beta Elevator",
                     "connections": {
-                        "Door to Transport Tunnel A": {
+                        "Door to Alpha": {
                             "type": "and",
                             "data": {
                                 "comment": null,
