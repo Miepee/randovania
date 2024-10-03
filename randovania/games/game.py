@@ -177,6 +177,9 @@ class GameData:
     web_info: GameWebInfo = GameWebInfo()
     """Contains a handful of fields displayed primarily on the website."""
 
+    logic_db_integrity: Callable[[GameDescription], typing.Iterator[str]] = lambda game: iter(())
+    """A function checking for game specific database integrity errors."""
+
 
 class RandovaniaGame(BitPackEnum, Enum):
     BLANK = "blank"

@@ -4,6 +4,7 @@ import typing
 
 from randovania.games import game
 from randovania.games.fusion import layout
+from randovania.games.fusion.db_integrity.integrity import find_fusion_db_errors
 from randovania.games.fusion.layout.preset_describer import FusionPresetDescriber
 
 if typing.TYPE_CHECKING:
@@ -98,4 +99,5 @@ game_data: game.GameData = game.GameData(
     patch_data_factory=_patch_data_factory,
     exporter=_exporter,
     multiple_start_nodes_per_area=True,
+    logic_db_integrity=find_fusion_db_errors,
 )
