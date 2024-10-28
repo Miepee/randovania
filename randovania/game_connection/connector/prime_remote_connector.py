@@ -338,7 +338,7 @@ class PrimeRemoteConnector(RemoteConnector):
             # It should automatically disconnect the executor, so fail loudly if that's not the case
             if self.executor.is_connected():
                 self.executor.disconnect()
-                self.logger.debug("Disconnecting due to an exception: %s", str(e))
+                self.logger.warning("Disconnecting due to an exception: %s", str(e))
 
         finally:
             if self.is_disconnected():
