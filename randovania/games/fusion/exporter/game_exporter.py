@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import dataclasses
+import json
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -47,4 +48,15 @@ class FusionGameExporter(GameExporter):
         progress_update: status_update_lib.ProgressUpdateCallable,
     ) -> None:
         assert isinstance(export_params, FusionGameExportParams)
-        raise RuntimeError("Needs to be implemented")
+        from mars_patcher.patcher import patch
+
+        json_path = Path(export_params.output_path.parent).joinpath(f"{export_params.output_path.stem}.json")
+
+        with json_path.open("w+") as f:
+            json.dump(patch_data, f, indent=4)
+
+        def hacked_progress(a: float, b: str) -> None:
+            progress_update(b, a)
+
+        patch(str(export_params.input_path), str(export_params.output_path), str(json_path), hacked_progress)
+        # raise RuntimeError("Needs to be implemented")

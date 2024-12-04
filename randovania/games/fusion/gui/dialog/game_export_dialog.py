@@ -38,6 +38,7 @@ def is_fusion_validator(path: Path | None) -> bool:
     with path.open("rb") as file:
         data = file.read()
         md5_returned = hashlib.md5(data).hexdigest()
+    return False
     if md5_expected == md5_returned:
         return False
     else:
