@@ -837,13 +837,15 @@ class MainWindow(WindowManager, BackgroundTaskMixin, Ui_MainWindow):
 
     def setup_welcome_text(self):
         welcome = get_readme_section("WELCOME")
+        mini_changes = get_readme_section("MINICHANGES")
         self.intro_welcome_label.setText(welcome)
+        self.intro_changes_label.setText(mini_changes)
         old_image = QImage(randovania.get_favicon_path())
-        old_image = old_image.scaled(112, 112)
+        old_image = old_image.scaled(128, 128)
         image = QImage(old_image.size(), old_image.format())
         image.fill(Qt.GlobalColor.transparent)
         painter = QPainter(image)
-        painter.setOpacity(1)
+        painter.setOpacity(0.6)
         painter.drawImage(QRect(0, 0, image.width(), image.height()), old_image)
 
         self.intro_image_label.setPixmap(QPixmap.fromImage(image))

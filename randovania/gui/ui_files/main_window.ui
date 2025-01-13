@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>698</width>
-    <height>582</height>
+    <width>700</width>
+    <height>620</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>700</width>
+    <height>620</height>
+   </size>
   </property>
   <property name="maximumSize">
    <size>
@@ -104,11 +110,27 @@
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
+              <property name="styleSheet">
+               <string notr="true"/>
+              </property>
               <property name="textFormat">
                <enum>Qt::TextFormat::MarkdownText</enum>
               </property>
               <property name="alignment">
                <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
+              </property>
+              <property name="wordWrap">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="intro_changes_label">
+              <property name="styleSheet">
+               <string notr="true"/>
+              </property>
+              <property name="text">
+               <string>Mini changes, changed from code</string>
               </property>
               <property name="wordWrap">
                <bool>true</bool>
@@ -128,30 +150,10 @@
               </property>
              </spacer>
             </item>
-            <item>
-             <layout class="QHBoxLayout" name="intro_bottom_layout">
-              <item>
-               <widget class="QLabel" name="intro_image_label">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                  <horstretch>100</horstretch>
-                  <verstretch>100</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string/>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignmentFlag::AlignBottom|Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing</set>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
            </layout>
           </item>
           <item>
-           <layout class="QVBoxLayout" name="button_layout" stretch="0,0,0,0,0,0,0,0,0,0">
+           <layout class="QVBoxLayout" name="button_layout" stretch="0,0,0,0,0,0,0,0,0,0,0">
             <property name="sizeConstraint">
              <enum>QLayout::SizeConstraint::SetFixedSize</enum>
             </property>
@@ -161,6 +163,28 @@
             <property name="bottomMargin">
              <number>6</number>
             </property>
+            <item>
+             <widget class="QLabel" name="intro_image_label">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>128</width>
+                <height>128</height>
+               </size>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
+              </property>
+             </widget>
+            </item>
             <item>
              <widget class="QPushButton" name="intro_play_solo_button">
               <property name="sizePolicy">
@@ -405,8 +429,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>674</width>
-          <height>401</height>
+          <width>676</width>
+          <height>439</height>
          </rect>
         </property>
        </widget>
@@ -651,7 +675,7 @@ For more information, check [Randovania Help](help://tab_multiworld)!</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>698</width>
+     <width>700</width>
      <height>23</height>
     </rect>
    </property>

@@ -39,9 +39,18 @@ without using any glitches or exploits. Its features include:
 * Randomize your starting equipment and location. Feeling brave? You can even shuffle items
   you normally start with.
 
+* Certain games have custom cosmetic options available for example to change the color of your HUD, player model, or items.
+
+ \
 Have fun and start randomizing!
 
 <!-- End WELCOME -->
+
+<!-- Begin MINICHANGES -->
+
+We've recently made some UI tweaks, including some new buttons! The item tracker, changelog, and help windows are now available on the landing page to make accessing them even easier.
+
+<!-- End MINICHANGES -->
 
 # Installation
 
