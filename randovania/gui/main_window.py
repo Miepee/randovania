@@ -15,8 +15,8 @@ from functools import partial
 from pathlib import Path
 
 from PySide6 import QtCore, QtGui, QtWidgets
-from PySide6.QtCore import Qt, QUrl, Signal
-from PySide6.QtGui import QPixmap
+from PySide6.QtCore import QRect, Qt, QUrl, Signal
+from PySide6.QtGui import QImage, QPainter, QPixmap
 from qasync import asyncSlot
 
 import randovania
@@ -838,10 +838,17 @@ class MainWindow(WindowManager, BackgroundTaskMixin, Ui_MainWindow):
     def setup_welcome_text(self):
         welcome = get_readme_section("WELCOME")
         self.intro_welcome_label.setText(welcome)
-        image = QPixmap(randovania.get_favicon_path())
-        image = image.scaled(112, 112)
-        self.intro_image_label.setPixmap(image)
+        old_image = QImage(randovania.get_favicon_path())
+        old_image = old_image.scaled(112, 112)
+        image = QImage(old_image.size(), old_image.format())
+        image.fill(Qt.GlobalColor.transparent)
+        painter = QPainter(image)
+        painter.setOpacity(1)
+        painter.drawImage(QRect(0, 0, image.width(), image.height()), old_image)
+
+        self.intro_image_label.setPixmap(QPixmap.fromImage(image))
         self.intro_version_label.setText(f"v{randovania.VERSION}")
+        painter.end()
 
     def _create_generic_window(self, widget: QtWidgets.QWidget, title: str | None = None) -> QtWidgets.QMainWindow:
         window = QtWidgets.QMainWindow()

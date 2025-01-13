@@ -131,16 +131,6 @@
             <item>
              <layout class="QHBoxLayout" name="intro_bottom_layout">
               <item>
-               <widget class="QLabel" name="intro_version_label">
-                <property name="text">
-                 <string>TextLabel</string>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignmentFlag::AlignBottom|Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft</set>
-                </property>
-               </widget>
-              </item>
-              <item>
                <widget class="QLabel" name="intro_image_label">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -161,7 +151,7 @@
            </layout>
           </item>
           <item>
-           <layout class="QVBoxLayout" name="button_layout" stretch="0,0,0,0,0,0,0,0,0">
+           <layout class="QVBoxLayout" name="button_layout" stretch="0,0,0,0,0,0,0,0,0,0">
             <property name="sizeConstraint">
              <enum>QLayout::SizeConstraint::SetFixedSize</enum>
             </property>
@@ -375,6 +365,28 @@
               </property>
              </widget>
             </item>
+            <item>
+             <widget class="QLabel" name="intro_version_label">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>140</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>version changed from code</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignmentFlag::AlignBottom|Qt::AlignmentFlag::AlignHCenter</set>
+              </property>
+             </widget>
+            </item>
            </layout>
           </item>
          </layout>
@@ -393,8 +405,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>98</width>
-          <height>28</height>
+          <width>674</width>
+          <height>401</height>
          </rect>
         </property>
        </widget>
