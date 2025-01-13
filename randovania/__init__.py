@@ -37,6 +37,15 @@ def get_icon_path() -> Path:
     return get_data_path().joinpath("icons", icon_name)
 
 
+def get_favicon_path() -> Path:
+    if is_dev_version():
+        icon_name = "rdv_favicon_red.png"
+    else:
+        icon_name = "rdv_favicon_blue.png"
+
+    return get_data_path().joinpath("icons", icon_name)
+
+
 def get_file_path() -> Path:
     if is_frozen():
         file_dir = Path(getattr(sys, "_MEIPASS"))

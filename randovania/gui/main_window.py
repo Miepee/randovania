@@ -16,6 +16,7 @@ from pathlib import Path
 
 from PySide6 import QtCore, QtGui, QtWidgets
 from PySide6.QtCore import Qt, QUrl, Signal
+from PySide6.QtGui import QPixmap
 from qasync import asyncSlot
 
 import randovania
@@ -837,6 +838,10 @@ class MainWindow(WindowManager, BackgroundTaskMixin, Ui_MainWindow):
     def setup_welcome_text(self):
         welcome = get_readme_section("WELCOME")
         self.intro_welcome_label.setText(welcome)
+        image = QPixmap(randovania.get_favicon_path())
+        image = image.scaled(112, 112)
+        self.intro_image_label.setPixmap(image)
+        self.intro_version_label.setText(f"v{randovania.VERSION}")
 
     def _create_generic_window(self, widget: QtWidgets.QWidget, title: str | None = None) -> QtWidgets.QMainWindow:
         window = QtWidgets.QMainWindow()
