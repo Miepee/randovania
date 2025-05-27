@@ -733,7 +733,8 @@
             "progression": [
                 "Omega Metroid Lure"
             ],
-            "expected_case_for_describer": "starting_item",
+            "expected_case_for_describer": "starting_item"
+        },
         "Arm Cannon": {
             "gui_category": "misc",
             "hint_features": [
