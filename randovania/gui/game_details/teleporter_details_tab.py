@@ -27,7 +27,10 @@ class TeleporterDetailsTab(BaseConnectionDetailsTab):
     ) -> None:
         for source, destination_loc in patches.all_dock_connections():
             # Fix for portal rando showing up in echoes tab
-            if source.dock_type not in patches.game.dock_weakness_database.all_teleporter_dock_types:
+            if not (
+                source.dock_type in patches.game.dock_weakness_database.all_teleporter_dock_types
+                or source.extra.get("is_area_transition")
+            ):
                 continue
             source_region = region_list.region_by_area_location(source.identifier.area_identifier)
             source_name = elevators.get_elevator_or_area_name(patches.game, region_list, source.identifier, True)

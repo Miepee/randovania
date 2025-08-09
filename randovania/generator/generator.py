@@ -34,7 +34,7 @@ if TYPE_CHECKING:
     from randovania.layout.generator_parameters import GeneratorParameters
     from randovania.layout.preset import Preset
 
-DEFAULT_ATTEMPTS = 15
+DEFAULT_ATTEMPTS = 150
 
 
 def _validate_pickup_pool_size(
@@ -91,7 +91,7 @@ async def create_player_pool(
     game_generator = game.game.generator
     game.resource_database = game_generator.bootstrap.patch_resource_database(game.resource_database, configuration)
 
-    for i in range(10):
+    for i in range(100):
         status_update(f"Attempt {i + 1} for initial state for world '{world_name}'")
         patches = game_generator.base_patches_factory.create_base_patches(
             configuration, rng, game, num_players > 1, player_index=player_index, rng_required=True
@@ -304,6 +304,7 @@ async def generate_and_validate_description(
     :param world_names: Name for each world. Used for error and status messages.
     :return:
     """
+    attempts = DEFAULT_ATTEMPTS
     actual_status_update: Callable[[str], None]
     if status_update is None:
 

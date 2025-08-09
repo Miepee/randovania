@@ -142,7 +142,7 @@
                 "Power Beam"
             ],
             "expected_case_for_describer": "starting_item",
-            "hide_from_gui": true
+            "hide_from_gui": false
         },
         "Bombs": {
             "gui_category": "morph_ball",
@@ -702,7 +702,7 @@
             ],
             "expected_case_for_describer": "starting_item",
             "description": "A custom item. Required to shoot Beams or Missiles.",
-            "hide_from_gui": true
+            "hide_from_gui": false
         },
         "Alpha Metroid Lure": {
             "gui_category": "misc",
@@ -718,7 +718,7 @@
                 "Alpha Metroid Lure"
             ],
             "expected_case_for_describer": "starting_item",
-            "hide_from_gui": true
+            "hide_from_gui": false
         },
         "Gamma Metroid Lure": {
             "gui_category": "misc",
@@ -734,7 +734,7 @@
                 "Gamma Metroid Lure"
             ],
             "expected_case_for_describer": "starting_item",
-            "hide_from_gui": true
+            "hide_from_gui": false
         },
         "Zeta Metroid Lure": {
             "gui_category": "misc",
@@ -750,7 +750,7 @@
                 "Zeta Metroid Lure"
             ],
             "expected_case_for_describer": "starting_item",
-            "hide_from_gui": true
+            "hide_from_gui": false
         },
         "Omega Metroid Lure": {
             "gui_category": "misc",
@@ -766,7 +766,39 @@
                 "Omega Metroid Lure"
             ],
             "expected_case_for_describer": "starting_item",
-            "hide_from_gui": true
+            "hide_from_gui": false
+        },
+        "Knockdown Trap": {
+            "gui_category": "misc",
+            "hint_features": [
+                "major",
+                "misc"
+            ],
+            "model_name": "sItemDNA",
+            "offworld_models": {},
+            "preferred_location_category": "major",
+            "description": "A custom item. Knocks you down upon collection.",
+            "progression": [
+                "Nothing"
+            ],
+            "expected_case_for_describer": "starting_item",
+            "hide_from_gui": false
+        },
+        "Flitt Trap": {
+            "gui_category": "misc",
+            "hint_features": [
+                "major",
+                "misc"
+            ],
+            "model_name": "sItemDNA",
+            "offworld_models": {},
+            "preferred_location_category": "major",
+            "description": "A custom item. Spawns a Flitt upon collection.",
+            "progression": [
+                "Nothing"
+            ],
+            "expected_case_for_describer": "starting_item",
+            "hide_from_gui": false
         }
     },
     "ammo_pickups": {

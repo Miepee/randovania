@@ -6164,6 +6164,15 @@
                                     {
                                         "type": "template",
                                         "data": "All Artifacts"
+                                    },
+                                    {
+                                        "type": "resource",
+                                        "data": {
+                                            "type": "events",
+                                            "name": "BossQueen",
+                                            "amount": 1,
+                                            "negate": false
+                                        }
                                     }
                                 ]
                             }

@@ -864,7 +864,7 @@ Extra - liquid_info: {'liquid_type': 0, 'liquid_level': 0}
   > Door to Crystal Climb West
       Trivial
   > Event - Baby
-      All Artifacts
+      After Boss - Queen Defeated and All Artifacts
 
 > Door to Crystal Climb West; Heals? False
   * Layers: default

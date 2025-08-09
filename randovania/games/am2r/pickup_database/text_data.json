@@ -186,5 +186,13 @@
     "Arm Cannon": {
         "text_desc": "Allows usage of your Arm Cannon",
         "text_header": "Got Arm Cannon"
-    }
+    },
+	"Knockdown Trap": {
+		"text_desc": "What a FOOL",
+		"text_header": "Get knocked down!"
+	},
+	"Flitt Trap": {
+		"text_desc": "What a FOOL",
+		"text_header": "Get slowed down!"
+	}
 }

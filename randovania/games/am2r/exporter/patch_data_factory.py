@@ -180,6 +180,12 @@ class AM2RPatchDataFactory(PatchDataFactory[AM2RConfiguration, AM2RCosmeticPatch
     def _create_room_dict(self) -> dict:
         rng = Random(self.description.get_seed_for_world(self.players_config.player_index))
 
+        all_shuffleable_enemies = set()
+        for area in self.game.region_list.all_areas:
+            for enemy in area.extra.get("enemy_data", {}).values():
+                all_shuffleable_enemies.add(enemy)
+        all_shuffleable_enemies = list(all_shuffleable_enemies)
+
         return_dict = {}
         for region in self.game.region_list.regions:
             for area in region.areas:
@@ -216,12 +222,18 @@ class AM2RPatchDataFactory(PatchDataFactory[AM2RConfiguration, AM2RCosmeticPatch
                             "should_be_at_very_front": linfo.get("should_be_at_very_front", False),
                         }
 
+                # Enemy rando TODO: make proper config for it
+                enemy_rando = {}
+                for instance_id, enemy in area.extra.get("enemy_data", {}).items():
+                    enemy_rando[instance_id] = rng.choice(all_shuffleable_enemies)
+
                 return_dict[area.extra["map_name"]] = {
                     "display_name": area.name,
                     "region_name": region.name,
                     "minimap_data": area.extra["minimap_data"],
                     "light_level": light_level,
                     "liquid_info": liquid_info,
+                    "change_instance_ids": enemy_rando,
                 }
 
         return return_dict
@@ -326,6 +338,7 @@ class AM2RPatchDataFactory(PatchDataFactory[AM2RConfiguration, AM2RCosmeticPatch
             "required_amount_of_dna": 46 - (config.artifacts.placed_artifacts - config.artifacts.required_artifacts),
             "flip_vertically": config.vertically_flip_gameplay,
             "flip_horizontally": config.horizontally_flip_gameplay,
+            "random_knockback": True,  # TOOD: make this a config
         }
         for item, state in config.ammo_pickup_configuration.pickups_state.items():
             launcher_dict = {
@@ -533,7 +546,20 @@ class AM2RPatchDataFactory(PatchDataFactory[AM2RConfiguration, AM2RCosmeticPatch
             )
         }
 
-        return {
+        regions = {
+            node.extra["instance_id"]: {
+                "dest_id": connection.extra["instance_id"],
+                "force_idle_after_transition": connection.extra["facing"] == node.extra["facing"],
+                "dest_direction": connection.extra["facing"],
+                "dest_room": self.game.region_list.area_by_area_location(connection.identifier.area_identifier).extra[
+                    "map_name"
+                ],
+            }
+            for node, connection in self.patches.all_dock_connections()
+            if isinstance(node, DockNode) and isinstance(connection, DockNode) and node.extra.get("is_area_transition")
+        }
+
+        foo = {
             "configuration_identifier": self._create_hash_dict(randovania_meta),
             "starting_items": self._create_starting_items_dict(),
             "starting_location": self._create_starting_location(),
@@ -541,8 +567,16 @@ class AM2RPatchDataFactory(PatchDataFactory[AM2RConfiguration, AM2RCosmeticPatch
             "rooms": self._create_room_dict(),
             "game_patches": self._create_game_patches(self.configuration, pickup_list, text_data, self.rng),
             "pipes": pipes if self.configuration.teleporters.mode != TeleporterShuffleMode.VANILLA else {},
+            "entrances": regions if self.configuration.teleporters.mode != TeleporterShuffleMode.VANILLA else {},
             "door_locks": self._create_door_locks(),
             "hints": self._create_hints(self.rng),
             "cosmetics": self._create_cosmetics(self.description.get_seed_for_world(self.players_config.player_index)),
             "credits_spoiler": self._credits_spoiler(),
         }
+
+        import json
+
+        with open("yams-data.json", "w+") as f:
+            json.dump(foo, f, indent=4)
+
+        return foo

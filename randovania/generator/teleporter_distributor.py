@@ -4,6 +4,7 @@ import copy
 from collections import defaultdict
 from typing import TYPE_CHECKING
 
+from randovania.game_description import default_database
 from randovania.game_description.db.dock_node import DockNode
 from randovania.generator.base_patches_factory import MissingRng
 from randovania.layout.lib.teleporters import TeleporterConfiguration, TeleporterShuffleMode
@@ -185,7 +186,11 @@ def get_dock_connections_assignment_for_teleporter(
 
 
 def get_teleporter_connections(
-    teleporters: TeleporterConfiguration, game: GameDatabaseView, rng: Random
+    teleporters: TeleporterConfiguration,
+    game: GameDatabaseView,
+    rng: Random,
+    teleporter_db: tuple[TeleporterHelper, ...] = (),
+    special: bool = False,
 ) -> TeleporterConnection:
     teleporter_connection: TeleporterConnection = {}
 
@@ -193,10 +198,11 @@ def get_teleporter_connections(
         if rng is None:
             raise MissingRng("Teleporter")
 
-        teleporter_dock_types = [
-            dock_type for dock_type in game.get_dock_types() if dock_type.extra.get("is_teleporter", False)
-        ]
-        teleporter_db = create_teleporter_database(game, teleporters.editable_teleporters, teleporter_dock_types)
+        if not teleporter_db:
+            teleporter_dock_types = [
+                dock_type for dock_type in game.get_dock_types() if dock_type.extra.get("is_teleporter", False)
+            ]
+            teleporter_db = create_teleporter_database(game, teleporters.editable_teleporters, teleporter_dock_types)
 
         # TODO: Error on unsupported modes
         if teleporters.mode in {TeleporterShuffleMode.TWO_WAY_RANDOMIZED, TeleporterShuffleMode.TWO_WAY_UNCHECKED}:
@@ -205,6 +211,23 @@ def get_teleporter_connections(
                 teleporter_database=teleporter_db,
                 between_areas=teleporters.mode == TeleporterShuffleMode.TWO_WAY_RANDOMIZED,
             )
+        elif special:
+            game_description = default_database.game_description_for(teleporters.game)
+            teleporter_dock_types = game_description.dock_weakness_database.all_teleporter_dock_types
+            region_list = game_description.region_list
+
+            result = []
+            for region, area, node in game.iterate_nodes_of_type(DockNode):
+                if isinstance(node, DockNode) and node.extra.get("is_area_transition"):
+                    result.append(node.identifier)
+            valid_targets = result
+            connections = one_way_teleporter_connections(
+                rng=rng,
+                teleporter_database=teleporter_db,
+                target_locations=valid_targets,
+                replacement=teleporters.mode != TeleporterShuffleMode.ONE_WAY_TELEPORTER,
+            )
+
         else:
             connections = one_way_teleporter_connections(
                 rng=rng,
