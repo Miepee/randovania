@@ -104,14 +104,14 @@ wheels = [
 
 [[package]]
 name = "am2r-yams"
-version = "2.8.3"
+version = "2.8.4"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pythonnet" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/8e/3e/8bdab0eb7898a03d99b42a15c859319e6f832294b590e286dd1f89f354a6/am2r_yams-2.8.3.tar.gz", hash = "sha256:611649966c8c7cc87f7e1ab26e7ebfe42094fbd82b55cc55cd865e4edc1f4651", size = 2148206, upload-time = "2025-10-07T18:28:07.294Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/a8/d8/04764b054298048ad9ffbf06dc40b81e594df8909ceaf4dd14e200098531/am2r_yams-2.8.4.tar.gz", hash = "sha256:31a1e8a5d096ddfc760c8ee595b6d17c1464dda009893ae8426626eb10001c60", size = 2146488, upload-time = "2025-10-20T19:54:39.974Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/51/c0/40ddd3ee4494c1b0a524bb6b778a832cd2fc56df93421b2de7232e8d62bf/am2r_yams-2.8.3-py3-none-any.whl", hash = "sha256:ed1872441a65adbc4ad034a8b8f51cf4f003d65b9b3c2e377d6841f4005a3716", size = 2141677, upload-time = "2025-10-07T18:28:04.378Z" },
+    { url = "https://files.pythonhosted.org/packages/0d/e3/7a8acde6687d450299bd985715f689f7948657068a4da8f44017ee1a36dd/am2r_yams-2.8.4-py3-none-any.whl", hash = "sha256:84974262af6a3000bd591561af0f42720b19c7d352eabaa9d2655553d201ea08", size = 2139564, upload-time = "2025-10-20T19:54:37.96Z" },
 ]
 
 [[package]]
@@ -679,19 +679,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/ae/29/f71316b9273b6552a263748e49cd7b83898dc9499a663d30c7b9cb853cb8/fastapi-0.115.5.tar.gz", hash = "sha256:0e7a4d0dc0d01c68df21887cce0945e72d3c48b9f4f79dfe7a7d53aa08fbb289", size = 301047, upload-time = "2024-11-12T16:17:34.8Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/54/c4/148d5046a96c428464557264877ae5a9338a83bbe0df045088749ec89820/fastapi-0.115.5-py3-none-any.whl", hash = "sha256:596b95adbe1474da47049e802f9a65ab2ffa9c2b07e7efee70eb8a66c9f2f796", size = 94866, upload-time = "2024-11-12T16:17:31.027Z" },
-]
-
-[[package]]
-name = "fastapi-discord"
-version = "0.2.7"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "aiocache" },
-    { name = "aiohttp" },
-    { name = "fastapi" },
-]
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/d8/d7/68b9a5cacc1002037503c5ffaf1a3b34b2f0c4803d80e2aafdf4ec2412a4/fastapi_discord-0.2.7-py3-none-any.whl", hash = "sha256:92fa5d12cc60b0eba8fbbd7d52d987f1a3fd088f6057ada9c6a4f93eb0f079b4", size = 7631, upload-time = "2024-11-19T21:35:20.152Z" },
 ]
 
 [[package]]
@@ -1597,16 +1584,16 @@ wheels = [
 
 [[package]]
 name = "open-samus-returns-rando"
-version = "3.3.0"
+version = "3.4.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "ips-py" },
     { name = "jsonschema" },
     { name = "mercury-engine-data-structures" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/75/e2/e28e8e32f6eee9acc1d2bf58acbe5a9ecf20469ee64fbb5906d792794069/open_samus_returns_rando-3.3.0.tar.gz", hash = "sha256:b3f852c9d7c59a6c8667c7fbb5edd8fb27af654475357e7f394ae1da9ef3941d", size = 548386, upload-time = "2025-08-20T23:32:35.353Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/2a/b8/80202302142af07fd011ca12a08322375b237621657f77ee49b4fc7843ed/open_samus_returns_rando-3.4.0.tar.gz", hash = "sha256:99e2d1c411737bad007b99b516157af3e0ec9e71814d59072c13a4f4444ac4bf", size = 548353, upload-time = "2025-10-21T17:30:09.811Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/63/41/ff393c1d968af1078ee3589af3e1e9f1ff92eff02d4f017105cf65971f98/open_samus_returns_rando-3.3.0-py3-none-any.whl", hash = "sha256:a847af94e57644d2e482d47343e8f1ec49156b7df3e62521366214dacbb432a5", size = 595003, upload-time = "2025-08-20T23:32:33.648Z" },
+    { url = "https://files.pythonhosted.org/packages/cf/40/d3cef141cf21b7e3dc00919dd36b6cf27a7903f58bd3bffeedae6dc6349d/open_samus_returns_rando-3.4.0-py3-none-any.whl", hash = "sha256:a662f1ba587c285ea990ad450977be1c84ca9365a202cb54f40bf948379e7f91", size = 595123, upload-time = "2025-10-21T17:30:07.119Z" },
 ]
 
 [[package]]
@@ -2469,6 +2456,7 @@ dependencies = [
     { name = "aiofiles" },
     { name = "aiohttp" },
     { name = "bitstruct" },
+    { name = "certifi" },
     { name = "construct" },
     { name = "cryptography" },
     { name = "dulwich" },
@@ -2517,10 +2505,10 @@ gui = [
     { name = "qrcode", extra = ["pil"] },
 ]
 server = [
+    { name = "aiocache" },
     { name = "audioop-lts", marker = "python_full_version >= '3.13'" },
     { name = "cachetools" },
     { name = "fastapi" },
-    { name = "fastapi-discord" },
     { name = "fastapi-socketio-handler" },
     { name = "graphviz" },
     { name = "itsdangerous" },
@@ -2568,6 +2556,7 @@ typing = [
 
 [package.metadata]
 requires-dist = [
+    { name = "aiocache", marker = "extra == 'server'" },
     { name = "aiofiles" },
     { name = "aiohttp", specifier = ">=3.9.3" },
     { name = "am2r-yams", marker = "extra == 'exporters'", specifier = ">=2.8.3" },
@@ -2577,13 +2566,13 @@ requires-dist = [
     { name = "bitstruct" },
     { name = "cachetools", marker = "extra == 'server'" },
     { name = "cave-story-randomizer", marker = "extra == 'exporters'", specifier = ">=2.4.2" },
+    { name = "certifi" },
     { name = "construct" },
     { name = "cryptography" },
     { name = "dolphin-memory-engine", marker = "extra == 'gui'", specifier = ">=1.0.2" },
     { name = "dulwich", specifier = ">=0.20,<0.23.0" },
     { name = "factorio-randovania-mod", marker = "extra == 'exporters'", specifier = ">=0.8.0" },
     { name = "fastapi", marker = "extra == 'server'" },
-    { name = "fastapi-discord", marker = "extra == 'server'", specifier = ">=0.2.7" },
     { name = "fastapi-socketio-handler", marker = "extra == 'server'", specifier = ">=0.4.0" },
     { name = "frozendict" },
     { name = "graphviz", marker = "extra == 'server'" },
@@ -2603,7 +2592,7 @@ requires-dist = [
     { name = "oauthlib", marker = "extra == 'server'" },
     { name = "open-dread-rando", marker = "extra == 'exporters'", specifier = ">=2.17.0" },
     { name = "open-prime-rando", marker = "extra == 'exporters'", specifier = ">=0.13.0" },
-    { name = "open-samus-returns-rando", marker = "extra == 'exporters'", specifier = ">=3.3.0" },
+    { name = "open-samus-returns-rando", marker = "extra == 'exporters'", specifier = ">=3.4.0" },
     { name = "packaging" },
     { name = "peewee", marker = "extra == 'server'" },
     { name = "pid", marker = "extra == 'gui'", specifier = ">=3.0.0" },

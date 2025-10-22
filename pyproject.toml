@@ -59,6 +59,8 @@ dependencies = [
     "typing-extensions>=4.4.0",
     # For compressing preset/rdvgames
     "zstandard",
+    # For consistent HTTPS certificate availability across platforms
+    "certifi",
 ]
 
 [project.optional-dependencies]
@@ -95,7 +97,7 @@ exporters = [
     "mp2hudcolor>=1.0.10",
 
     # Metroid: Samus Returns
-    "open-samus-returns-rando>=3.3.0",
+    "open-samus-returns-rando>=3.4.0",
 ]
 
 gui = [
@@ -129,7 +131,7 @@ server = [
     "prometheus-fastapi-instrumentator",
 
     # discord auth
-    "fastapi-discord>=0.2.7",
+    "aiocache",  # for fastapi_discord copy
     "oauthlib",
     "pyjwt",
 
@@ -234,7 +236,7 @@ select = [
     "PLW",
     "SIM101",
 ]
-extend-ignore = [
+ignore = [
     "ISC001",  # may cause conflicts with formatter
     "PLW0603",  # we use some globals here and there
     "PLW2901",  # TODO: should actually fix these
@@ -277,6 +279,7 @@ runtime-evaluated-decorators = [
 files = [
     "randovania/bitpacking/",
     "randovania/cli/",
+    "randovania/discord_bot/preset_lookup.py",
     "randovania/exporter/",
     "randovania/game/",
     "randovania/game_connection/",
@@ -376,7 +379,7 @@ module = [
     "pytestqt.*",
     "qasync.*",
     "ruamel.*",
-    "fastapi_discord.*",
+    "aiocache.*",
     "socketio_handler.*",
 ]
 ignore_missing_imports = true
