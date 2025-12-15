@@ -43,6 +43,7 @@ class EchoesBootstrap(Bootstrap[EchoesConfiguration]):
             configuration.energy_per_tank - 1,
             configuration.energy_per_tank,
             game.get_resource_database_view().get_item("EnergyTank"),
+            [],
         )
 
     def event_resources_for_configuration(
@@ -58,7 +59,6 @@ class EchoesBootstrap(Bootstrap[EchoesConfiguration]):
         if configuration.use_new_patcher:
             yield resource_database.get_event("Event73"), 1  # Dynamo Chamber Gates
             yield resource_database.get_event("Event75"), 1  # Trooper Security Station Gate
-            yield resource_database.get_event("Event20"), 1  # Security Station B DS Appearance
 
     def _get_enabled_misc_resources(
         self, configuration: EchoesConfiguration, resource_database: ResourceDatabaseView

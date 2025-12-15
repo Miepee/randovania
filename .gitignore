@@ -18,6 +18,13 @@ randovania/version.py
 randovania/version_hash.py
 .qt_for_python/
 
+# Cython
+randovania/enable-cython
+randovania/**/*.cpp
+randovania/**/*.so
+randovania/**/*.html
+/cython_debug
+
 # PyInstaller
 #  Usually these files are written by a python script from a template
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
@@ -74,7 +81,7 @@ target/
 *.swp
 
 # Usual dev server db
-/tools/test.db
+/tools/*.db
 /network-storage
 
 .codspeed/

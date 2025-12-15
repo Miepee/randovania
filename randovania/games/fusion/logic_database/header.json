@@ -597,7 +597,7 @@
                 "extra": {}
             },
             "Ridley": {
-                "long_name": "Boss Ridley Deafeated",
+                "long_name": "Boss Ridley Defeated",
                 "extra": {}
             },
             "OmegaMetroid": {
@@ -686,6 +686,10 @@
             },
             "RightSiloCheckpointShutter": {
                 "long_name": "Access Right of Silo Checkpoint Shutter",
+                "extra": {}
+            },
+            "Animals": {
+                "long_name": "Main Deck Animal Controls",
                 "extra": {}
             }
         },
@@ -2931,7 +2935,8 @@
             "hint_details": [
                 "",
                 "in a room with more than one pickup"
-            ]
+            ],
+            "hidden": true
         },
         "mimic": {
             "long_name": "Mimic",
@@ -2955,6 +2960,13 @@
                 "in a room with extreme temperatures"
             ],
             "description": "Includes heated and cold rooms. Does not include lava."
+        },
+        "systems_console": {
+            "long_name": "B.S.L. Systems Console",
+            "hint_details": [
+                "",
+                "by activating a B.S.L. system console"
+            ]
         }
     },
     "used_trick_levels": {

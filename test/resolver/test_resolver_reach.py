@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from unittest.mock import MagicMock, PropertyMock
+from unittest.mock import MagicMock
 
-from randovania.game_description.db.event_node import EventNode
+from randovania.graph.world_graph import WorldGraphNode
 from randovania.resolver.resolver_reach import ResolverReach
 
 
@@ -18,15 +18,14 @@ def test_possible_actions_empty():
 def test_possible_actions_no_resources():
     state = MagicMock()
     node_a = MagicMock(name="node_a")
+    node_a.has_all_resources.return_value = True
     node_b = MagicMock(name="node_b")
-    node_b.should_collect.return_value = False
+    node_b.has_all_resources.return_value = True
     logic = MagicMock()
-    logic.game.region_list.all_nodes = [node_a, node_b]
+    logic.all_nodes = [node_a, node_b]
+    logic.graph = None
     node_a.node_index = 0
     node_b.node_index = 1
-
-    type(node_a).is_resource_node = prop_a = PropertyMock(return_value=False)
-    type(node_b).is_resource_node = prop_b = PropertyMock(return_value=True)
 
     # Run
     reach = ResolverReach({0: 1, 1: 1}, {}, frozenset(), logic)
@@ -34,21 +33,20 @@ def test_possible_actions_no_resources():
 
     # Assert
     assert options == []
-    prop_a.assert_called_once_with()
-    prop_b.assert_called_once_with()
-    node_b.should_collect.assert_called_once_with(state.node_context.return_value)
+    node_a.has_all_resources.assert_called_once_with(state.resources)
+    node_b.has_all_resources.assert_called_once_with(state.resources)
 
 
 def test_possible_actions_with_event():
     logic = MagicMock()
+    logic.graph = None
     state = MagicMock()
 
-    event = MagicMock(spec=EventNode, name="event node")
+    event = MagicMock(spec=WorldGraphNode, name="event node")
     event.node_index = 0
-    type(event).is_resource_node = prop = PropertyMock(return_value=True)
-    event.should_collect.return_value = True
+    event.has_all_resources.return_value = False
 
-    logic.game.region_list.all_nodes = [event]
+    logic.all_nodes = [event]
     damage_state = MagicMock()
 
     # Run
@@ -57,9 +55,6 @@ def test_possible_actions_with_event():
 
     # Assert
     assert options == [event]
-    prop.assert_called_once_with()
-    event.should_collect.assert_called_once_with(state.node_context.return_value)
+    event.has_all_resources.assert_called_once_with(state.resources)
     logic.get_additional_requirements.assert_called_once_with(event)
-    logic.get_additional_requirements.return_value.satisfied.assert_called_once_with(
-        state.node_context(), damage_state.health_for_damage_requirements.return_value
-    )
+    logic.get_additional_requirements.return_value.satisfied.assert_called_once_with(state.resources, damage_state)

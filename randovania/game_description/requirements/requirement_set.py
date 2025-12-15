@@ -23,17 +23,19 @@ class RequirementSet:
     alternatives: frozenset[RequirementList]
     _cached_hash: int | None = None
 
-    def __init__(self, alternatives: Iterable[RequirementList]):
+    def __init__(self, alternatives: Iterable[RequirementList], skip_subset_check: bool = False):
         """
         Constructs a RequirementSet from given iterator of RequirementList.
-        Redundant alternatives (Bombs or Bombs + Space Jump) are automatically removed.
+        Redundant alternatives (Bombs or Bombs + Space Jump) are removed when skip_subset_check is False.
         :param alternatives:
+        :param skip_subset_check: Can be set to skip the subset check, as it's an expensive operation.
+            Useful if you know it won't produce useful results, or wish to do it outside of this constructor.
         """
         input_set = frozenset(alternatives)
         self.alternatives = frozenset(
             requirement
             for requirement in input_set
-            if not any(other.is_proper_subset_of(requirement) for other in input_set)
+            if skip_subset_check or not any(other.is_proper_subset_of(requirement) for other in input_set)
         )
 
     def __deepcopy__(self, memodict: dict) -> RequirementSet:
@@ -50,15 +52,18 @@ class RequirementSet:
     def __repr__(self) -> str:
         return repr(self.alternatives)
 
-    def pretty_print(self, indent: str = "", print_function: typing.Callable[[str], None] = logging.info) -> None:
-        to_print = []
+    @property
+    def as_lines(self) -> Iterator[str]:
         if self == RequirementSet.impossible():
-            to_print.append("Impossible")
+            yield "Impossible"
         elif self == RequirementSet.trivial():
-            to_print.append("Trivial")
+            yield "Trivial"
         else:
-            to_print.extend(str(alternative) for alternative in self.alternatives)
-        for line in sorted(to_print):
+            for alternative in self.alternatives:
+                yield str(alternative)
+
+    def pretty_print(self, indent: str = "", print_function: typing.Callable[[str], None] = logging.info) -> None:
+        for line in sorted(self.as_lines):
             print_function(indent + line)
 
     @property
@@ -76,11 +81,17 @@ class RequirementSet:
         # empty RequirementList.satisfied is True
         return cls([RequirementList([])])
 
+    def is_trivial(self) -> bool:
+        return self == RequirementSet.trivial()
+
     @classmethod
     @lru_cache
     def impossible(cls) -> RequirementSet:
         # No alternatives makes satisfied always return False
         return cls([])
+
+    def is_impossible(self) -> bool:
+        return self == RequirementSet.impossible()
 
     def satisfied(self, context: NodeContext, current_energy: int) -> bool:
         """

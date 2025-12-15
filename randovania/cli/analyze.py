@@ -13,6 +13,11 @@ __all__ = ["create_subparsers"]
 
 def run_analysis(args: Namespace) -> None:
     create_report(args.seeds_dir, args.output_file, args.csv_dir)  # args.use_percentage, args.major_progression_only)
+    # from randovania.log_analyzer import log_analyzer
+
+    # log_analyzer.create_report(
+    #    args.seeds_dir, args.output_file, args.csv_dir, args.use_percentage, args.major_progression_only
+    # )
     print("Analysis finished")
 
 

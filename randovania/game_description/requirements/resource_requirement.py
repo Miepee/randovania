@@ -98,8 +98,14 @@ class ResourceRequirement(Requirement):
             return str(self)
 
     @property
-    def _as_comparison_tuple(self) -> tuple[ResourceType, str, int, bool]:
-        return self.resource.resource_type, self.resource.short_name, self.amount, self.negate
+    def _as_comparison_tuple(self) -> tuple[ResourceType, str, int, bool, int]:
+        return (
+            self.resource.resource_type,
+            self.resource.short_name,
+            self.amount,
+            self.negate,
+            self.resource.resource_index,
+        )
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, ResourceRequirement):
@@ -150,12 +156,16 @@ class DamageResourceRequirement(ResourceRequirement):
         return True
 
     def damage(self, context: NodeContext) -> int:
-        return ceil(context.database.get_damage_reduction(self.resource, context.current_resources) * self.amount)
+        return ceil(context.current_resources.get_damage_reduction(self.resource.resource_index) * self.amount)
 
     def satisfied(self, context: NodeContext, current_energy: int) -> bool:
         return current_energy > self.damage(context)
 
     def isolate_damage_requirements(self, context: NodeContext) -> Requirement:
+        if context.current_resources.get_damage_reduction(self.resource.resource_index) == 0:
+            # Common case of reduction-based immunity can be easily calculated,
+            # and returning Trivial allows for shortcuts elsewhere
+            return Requirement.trivial()
         return self
 
     def multiply_amount(self, multiplier: float) -> ResourceRequirement:

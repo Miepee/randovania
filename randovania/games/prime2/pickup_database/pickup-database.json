@@ -71,7 +71,7 @@
                 "a ",
                 "missile-related upgrade"
             ],
-            "hidden": true
+            "random_hint_target": false
         },
         "morph_ball_related": {
             "long_name": "Morph Ball Related",
@@ -79,7 +79,7 @@
                 "a ",
                 "morph ball-related upgrade"
             ],
-            "hidden": true
+            "random_hint_target": false
         },
         "beam_related": {
             "long_name": "Beam Related",
@@ -87,7 +87,7 @@
                 "a ",
                 "beam-related upgrade"
             ],
-            "hidden": true
+            "random_hint_target": false
         },
         "life_support": {
             "long_name": "Life Support",
@@ -95,7 +95,7 @@
                 "a ",
                 "life support system"
             ],
-            "hidden": true
+            "random_hint_target": false
         },
         "hud": {
             "long_name": "HUD System",
@@ -103,7 +103,7 @@
                 "a ",
                 "HUD system"
             ],
-            "hidden": true
+            "random_hint_target": false
         },
         "temple_key": {
             "long_name": "Dark Temple Key",
@@ -142,7 +142,8 @@
             "hint_details": [
                 "a ",
                 "key"
-            ]
+            ],
+            "random_hint_target": false
         },
         "chozo": {
             "long_name": "Chozo Technology",
@@ -150,7 +151,7 @@
                 "some ",
                 "Chozo technology"
             ],
-            "hidden": true
+            "random_hint_target": false
         },
         "luminoth": {
             "long_name": "Luminoth Technology",
@@ -158,7 +159,7 @@
                 "some ",
                 "Luminoth technology"
             ],
-            "hidden": true
+            "random_hint_target": false
         },
         "light": {
             "long_name": "Light-Aligned",
@@ -186,21 +187,24 @@
             "hint_details": [
                 "a ",
                 "targeting system"
-            ]
+            ],
+            "hidden": true
         },
         "ordnance": {
             "long_name": "Ordnance",
             "hint_details": [
                 "an ",
                 "ordnance system"
-            ]
+            ],
+            "hidden": true
         },
         "chassis": {
             "long_name": "Chassis",
             "hint_details": [
                 "a ",
                 "chassis upgrade"
-            ]
+            ],
+            "hidden": true
         }
     },
     "generated_pickups": {
@@ -1058,6 +1062,7 @@
                 "chozo",
                 "major",
                 "missile",
+                "missile_related",
                 "ordnance"
             ],
             "model_name": "SuperMissile",
@@ -1088,6 +1093,7 @@
                 "luminoth",
                 "major",
                 "missile",
+                "missile_related",
                 "ordnance"
             ],
             "model_name": "Sunburst",
@@ -1115,6 +1121,7 @@
                 "luminoth",
                 "major",
                 "missile",
+                "missile_related",
                 "ordnance"
             ],
             "model_name": "Darkburst",
@@ -1144,6 +1151,7 @@
                 "luminoth",
                 "major",
                 "missile",
+                "missile_related",
                 "ordnance"
             ],
             "model_name": "SonicBoom",

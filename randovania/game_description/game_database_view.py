@@ -5,8 +5,9 @@ from abc import ABC
 from typing import TYPE_CHECKING, final, override
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator, Sequence
+    from collections.abc import Iterator, Mapping, Sequence
 
+    from randovania.game.game_enum import RandovaniaGame
     from randovania.game_description.db.area import Area
     from randovania.game_description.db.area_identifier import AreaIdentifier
     from randovania.game_description.db.dock import DockType, DockWeakness
@@ -50,10 +51,24 @@ class ResourceDatabaseView(ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
+    def get_all_items(self) -> Sequence[ItemResourceInfo]:
+        """
+        Gets a list of all ItemResourceInfo
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
     def get_event(self, short_name: str) -> SimpleResourceInfo:
         """
         Gets a ResourceInfo of type EVENT, using internal name
         Raises KeyError if it doesn't exist.
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def get_all_events(self) -> Sequence[SimpleResourceInfo]:
+        """
+        Gets a list of resources of type EVENT
         """
         raise NotImplementedError
 
@@ -89,7 +104,7 @@ class ResourceDatabaseView(ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_damage_reduction(self, resource: SimpleResourceInfo, current_resources: ResourceCollection) -> float:
+    def get_damage_reduction(self, resource: ResourceInfo, current_resources: ResourceCollection) -> float:
         """
         Gets the damage reduction for given resource with the given current resources.
         """
@@ -117,6 +132,12 @@ class ResourceDatabaseView(ABC):
         """
         raise NotImplementedError
 
+    @abc.abstractmethod
+    def create_resource_collection(self) -> ResourceCollection:
+        """
+        Creates a new ResourceCollection
+        """
+
 
 class ResourceDatabaseViewProxy(ResourceDatabaseView):
     """
@@ -136,8 +157,16 @@ class ResourceDatabaseViewProxy(ResourceDatabaseView):
         return self._original.get_item_by_display_name(name)
 
     @override
+    def get_all_items(self) -> Sequence[ItemResourceInfo]:
+        return self._original.get_all_items()
+
+    @override
     def get_event(self, short_name: str) -> SimpleResourceInfo:
         return self._original.get_event(short_name)
+
+    @override
+    def get_all_events(self) -> Sequence[SimpleResourceInfo]:
+        return self._original.get_all_events()
 
     @override
     def get_misc(self, short_name: str) -> SimpleResourceInfo:
@@ -156,7 +185,7 @@ class ResourceDatabaseViewProxy(ResourceDatabaseView):
         return self._original.get_damage(short_name)
 
     @override
-    def get_damage_reduction(self, resource: SimpleResourceInfo, current_resources: ResourceCollection) -> float:
+    def get_damage_reduction(self, resource: ResourceInfo, current_resources: ResourceCollection) -> float:
         return self._original.get_damage_reduction(resource, current_resources)
 
     @override
@@ -171,6 +200,10 @@ class ResourceDatabaseViewProxy(ResourceDatabaseView):
     def get_pickup_model(self, name: str) -> PickupModel:
         return self._original.get_pickup_model(name)
 
+    @override
+    def create_resource_collection(self) -> ResourceCollection:
+        return self._original.create_resource_collection()
+
 
 class GameDatabaseView(ABC):
     """
@@ -178,6 +211,12 @@ class GameDatabaseView(ABC):
 
     These APIs are all expected to be slow and shouldn't be used in any performance sensitive code.
     """
+
+    @abc.abstractmethod
+    def get_game_enum(self) -> RandovaniaGame:
+        """
+        Returns the RandovaniaGame enum for this game.
+        """
 
     @abc.abstractmethod
     def node_iterator(self) -> Iterator[tuple[Region, Area, Node]]:
@@ -225,12 +264,6 @@ class GameDatabaseView(ABC):
     def assert_pickup_index_exists(self, index: PickupIndex) -> None:
         """
         If the PickupIndex does not exist, this function raises an Exception
-        """
-
-    @abc.abstractmethod
-    def create_resource_collection(self) -> ResourceCollection:
-        """
-        Creates a new ResourceCollection
         """
 
     @abc.abstractmethod
@@ -299,6 +332,12 @@ class GameDatabaseView(ABC):
         :raises: KeyError if it doesn't exist
         """
 
+    @abc.abstractmethod
+    def get_configurable_node_requirements(self) -> Mapping[NodeIdentifier, Requirement]:
+        """
+        All configurable node requirements to leave, as a mapping of their node identifiers to the values.
+        """
+
 
 class GameDatabaseViewProxy(GameDatabaseView):
     """
@@ -308,6 +347,10 @@ class GameDatabaseViewProxy(GameDatabaseView):
 
     def __init__(self, original: GameDatabaseView):
         self._original = original
+
+    @override
+    def get_game_enum(self) -> RandovaniaGame:
+        return self._original.get_game_enum()
 
     @override
     def node_iterator(self) -> Iterator[tuple[Region, Area, Node]]:
@@ -320,10 +363,6 @@ class GameDatabaseViewProxy(GameDatabaseView):
     @override
     def assert_pickup_index_exists(self, index: PickupIndex) -> None:
         return self._original.assert_pickup_index_exists(index)
-
-    @override
-    def create_resource_collection(self) -> ResourceCollection:
-        return self._original.create_resource_collection()
 
     @override
     def default_starting_location(self) -> NodeIdentifier:
@@ -360,3 +399,7 @@ class GameDatabaseViewProxy(GameDatabaseView):
     @override
     def area_from_node(self, node: Node) -> Area:
         return self._original.area_from_node(node)
+
+    @override
+    def get_configurable_node_requirements(self) -> Mapping[NodeIdentifier, Requirement]:
+        return self._original.get_configurable_node_requirements()

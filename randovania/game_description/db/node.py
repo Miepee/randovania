@@ -5,7 +5,6 @@ import typing
 
 from frozendict import frozendict
 
-from randovania.game_description.requirements.base import Requirement
 from randovania.lib import frozen_lib
 
 if typing.TYPE_CHECKING:
@@ -31,7 +30,7 @@ class NodeLocation:
         assert isinstance(self.z, float)
 
 
-@dataclasses.dataclass(frozen=True)
+@dataclasses.dataclass(slots=True)
 class NodeContext:
     patches: GamePatches | None  # this shouldn't be None, but certain places can't provide one
     current_resources: ResourceCollection
@@ -77,7 +76,6 @@ class Node:
                 raise ValueError(f"Expected dict for extra, got {type(self.extra)}")
             object.__setattr__(self, "extra", frozen_lib.wrap(self.extra))
 
-    @property
     def is_resource_node(self) -> bool:
         return False
 
@@ -85,17 +83,6 @@ class Node:
     def is_derived_node(self) -> bool:
         """If True, this node was created dynamically from other nodes."""
         return False
-
-    def requirement_to_leave(self, context: NodeContext) -> Requirement:
-        return Requirement.trivial()
-
-    def connections_from(self, context: NodeContext) -> typing.Iterator[tuple[Node, Requirement]]:
-        """
-        Queries all nodes from other areas you can go from a given node. Aka, doors and teleporters
-        :param context:
-        :return: Generator of pairs Node + Requirement for going to that node
-        """
-        yield from []
 
 
 @dataclasses.dataclass(frozen=True, slots=True)
