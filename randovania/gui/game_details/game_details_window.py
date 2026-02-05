@@ -256,7 +256,7 @@ class GameDetailsWindow(CloseEventWidget, Ui_GameDetailsWindow, BackgroundTaskMi
         self.player_index_combo.setCurrentIndex(0)
         self.player_index_combo.setVisible(description.world_count > 1)
 
-        if description.has_spoiler:
+        if description.has_spoiler or True:
             exists_minimal_logic = any(
                 preset.configuration.trick_level.minimal_logic for preset in description.all_presets
             )
@@ -303,7 +303,7 @@ class GameDetailsWindow(CloseEventWidget, Ui_GameDetailsWindow, BackgroundTaskMi
             self.layout_info_tab.removeTab(self.layout_info_tab.indexOf(tab.widget()))
         self._game_details_tabs.clear()
 
-        if description.has_spoiler:
+        if description.has_spoiler or True:
             players_config = self.players_configuration
 
             spoiler_visualizer = list(preset.game.gui.spoiler_visualizer)

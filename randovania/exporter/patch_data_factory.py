@@ -85,7 +85,7 @@ class PatchDataFactory[Configuration: BaseConfiguration, CosmeticPatches: BaseCo
     def create_default_patcher_data_meta(self) -> PatcherDataMeta:
         return {
             "layout_was_user_modified": self.description.user_modified,
-            "in_race_setting": not self.description.has_spoiler,
+            "in_race_setting": False,
         }
 
     def _attach_to_sentry(self) -> None:

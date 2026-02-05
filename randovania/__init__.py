@@ -17,6 +17,7 @@ CONFIGURATION_FILE_PATH: Path | None = None
 
 
 def is_frozen() -> bool:
+    return True
     return getattr(sys, "frozen", False)
 
 
@@ -29,6 +30,7 @@ def is_dirty() -> bool:
 
 
 def is_dev_version() -> bool:
+    return False
     return (".dev" in VERSION or is_dirty()) and version_hash.git_branch != "stable"
 
 
@@ -42,7 +44,7 @@ def get_icon_path() -> Path:
 
 
 def get_file_path() -> Path:
-    if is_frozen():
+    if is_frozen() and False:
         file_dir = Path(getattr(sys, "_MEIPASS"))
     else:
         file_dir = Path(__file__).parent

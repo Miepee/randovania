@@ -300,4 +300,4 @@ class LayoutDescription:
         )
 
     def save_to_file(self, json_path: Path) -> None:
-        json_lib.write_path(json_path, self.as_json())
+        json_lib.write_path(json_path, self.as_json(force_spoiler=True))
