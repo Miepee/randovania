@@ -173,7 +173,7 @@ class EchoesRemoteConnector(PrimeRemoteConnector):
     async def get_inventory(self) -> Inventory:
         inventory = await super().get_inventory()
 
-        if self._should_read_object_count:
+        if self._should_read_object_count and inventory != Inventory.empty():
             inventory[self.game.get_resource_database_view().get_item("ObjectCount")] = InventoryItem(
                 await self._read_object_count(), 1024
             )
